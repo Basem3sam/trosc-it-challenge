@@ -132,9 +132,18 @@ export default function WelcomeScreen({ best, onStart }) {
         </button>
       </form>
 
-      <p className="mt-5 whitespace-nowrap text-center font-mono text-[0.62rem] tracking-[0.06em] text-dust">
-        NO SIGN-UP · ~3 MIN · {HEARTS_MAX} HEARTS · EVERY {POWERUP_EVERY} IN A
-        ROW = POWER-UP
+      <p className="mt-5 text-center font-mono text-[0.68rem] tracking-[0.08em] text-dust sm:text-[0.7rem]">
+        <span className="sm:hidden">
+          NO SIGN-UP · ~3 MIN · {HEARTS_MAX} HEARTS
+        </span>
+        <br className="sm:hidden" />
+        <span className="sm:hidden">
+          EVERY {POWERUP_EVERY} IN A ROW = POWER-UP
+        </span>
+        <span className="hidden sm:inline">
+          NO SIGN-UP · ~3 MIN · {HEARTS_MAX} HEARTS · EVERY {POWERUP_EVERY} IN A
+          ROW = POWER-UP
+        </span>
       </p>
 
       {best !== null && (

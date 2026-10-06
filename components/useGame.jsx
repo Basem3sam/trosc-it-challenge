@@ -764,11 +764,6 @@ export default function useGame() {
     return () => stopMusic();
   }, [screen, muted]);
 
-  /* switch the battle loop to the tense pattern during DANGER */
-  useEffect(() => {
-    setMusicDanger(danger);
-  }, [danger]);
-
   /* ---------- global bits ---------- */
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -884,6 +879,11 @@ export default function useGame() {
   const warn = answering && remaining <= WARN_AT && remaining > DANGER_AT;
   const danger = answering && remaining <= DANGER_AT && remaining > 0;
   const mood = danger ? 'furious' : warn ? 'angry' : '';
+
+  /* switch the battle loop to the tense pattern during DANGER */
+  useEffect(() => {
+    setMusicDanger(danger);
+  }, [danger]);
 
   return {
     // state

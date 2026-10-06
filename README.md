@@ -1,19 +1,19 @@
 # ⚔️ TROSC · IT Challenge
 
 <p align="center">
-  <strong>A monster-battle quiz game built for the TROSC IT Session at Suez Canal University.</strong>
+<strong>A monster-battle quiz game built for the TROSC IT Session at Suez Canal University.</strong>
 </p>
 
 <p align="center">
-  Freshmen scan a QR code, enter their name, and battle through <strong>10 IT-themed monsters</strong> by answering beginner-friendly technology questions.
+Freshmen scan a QR code, enter their name, and battle through <strong>10 IT-themed monsters</strong> by answering beginner-friendly technology questions.
 </p>
 
 <p align="center">
-  <strong>Think. Choose. Slay. ⚡</strong>
+<strong>Think. Choose. Slay. ⚡</strong>
 </p>
 
 <p align="center">
-  🎮 <a href="https://trosc-challenge.vercel.app">Play the Live Game</a>
+🎮 <a href="https://trosc-challenge.vercel.app">Play the Live Game</a> 🎮
 </p>
 
 ---
@@ -192,6 +192,6 @@ Free to use, learn from, modify, and remix.
 ---
 
 <p align="center">
-  Made with ❤️ by the <strong>TROSC IT Team</strong><br>
-  Suez Canal University
+Made with ❤️ by the <strong>TROSC IT Team</strong><br>
+Suez Canal University
 </p>

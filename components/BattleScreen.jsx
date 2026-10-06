@@ -3,7 +3,13 @@
 import { Icon, HeartIcon } from '@/lib/icons';
 import { monsterSVG } from '@/lib/monsters';
 import { BTN_PRIMARY } from '@/lib/ui';
-import { QUESTION_TIME, WARN_AT, DANGER_AT, HEARTS_MAX } from '@/lib/game';
+import {
+  QUESTION_TIME,
+  WARN_AT,
+  DANGER_AT,
+  HEARTS_MAX,
+  POWERUP_EVERY,
+} from '@/lib/game';
 
 function Hearts({ hearts, brokeAt, max }) {
   return (
@@ -136,6 +142,12 @@ export default function BattleScreen({ g }) {
   const enemyDown = g.monsterPhase === 'hit' || g.monsterPhase === 'dead';
   const lastLevel = g.index === g.total - 1;
 
+  /* streak progress toward the next power-up (grants on every POWERUP_EVERY-th
+     correct in a row): filled dots = combo % EVERY; pulses when 1 away */
+  const pwrFilled = g.combo % POWERUP_EVERY;
+  const pwrDots = '●'.repeat(pwrFilled) + '○'.repeat(POWERUP_EVERY - pwrFilled);
+  const pwrHot = pwrFilled === POWERUP_EVERY - 1;
+
   return (
     <section
       aria-labelledby="question-text"
@@ -264,8 +276,8 @@ export default function BattleScreen({ g }) {
         </p>
       )}
 
-      {/* power-ups */}
-      <div className="mb-2 flex items-center gap-2">
+      {/* power-ups + streak meter */}
+      <div className="mb-2 flex flex-wrap items-center gap-2">
         <PowerButton
           icon="cut"
           label="50/50"
@@ -280,10 +292,26 @@ export default function BattleScreen({ g }) {
           disabled={!g.canFreeze}
           onClick={g.useFreeze}
         />
+
+        {/* next power-up meter — every POWERUP_EVERY correct in a row grants one */}
         <span
-          className={`ml-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[0.62rem] tracking-[0.14em] ${g.shieldActive ? 'animate-shieldpulse border-gold/50 bg-gold/10 text-gold' : 'border-edge bg-panel text-dust opacity-60'}`}
+          title={`Every ${POWERUP_EVERY} correct answers in a row earn a power-up`}
+          className={`ml-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[0.62rem] tracking-[0.14em] ${pwrHot ? 'animate-shieldpulse border-gold/50 bg-gold/10 text-gold' : 'border-edge bg-panel text-dust'}`}
         >
-          <Icon name="shield" className="h-3.5 w-3.5" /> SHIELD
+          <Icon name="bolt" className="h-3.5 w-3.5" />
+          <span aria-hidden="true">{pwrDots}</span>
+        </span>
+
+        <span
+          title={
+            g.shieldActive
+              ? 'Shield active — your next mistake is free'
+              : 'No shield — earn one with a 3-streak'
+          }
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[0.62rem] tracking-[0.14em] ${g.shieldActive ? 'animate-shieldpulse border-gold/50 bg-gold/10 text-gold' : 'border-edge bg-panel text-dust opacity-60'}`}
+        >
+          <Icon name="shield" className="h-3.5 w-3.5" />
+          {g.shieldActive ? 'SHIELD ON' : 'SHIELD'}
         </span>
       </div>
 

@@ -9,6 +9,14 @@ import { Icon } from '@/lib/icons';
 import { unlockAudio } from '@/lib/sounds';
 import { SITE_URL } from '@/lib/game';
 
+/* fire palette: [color, glow] pairs */
+const EMBER_COLORS = [
+  ['#FF4655', 'rgba(255,70,85,.75)'],
+  ['#FF7A3D', 'rgba(255,122,61,.65)'],
+  ['#FFC53D', 'rgba(255,197,61,.55)'],
+  ['#FF5E7A', 'rgba(255,94,122,.65)'],
+];
+
 export default function Game() {
   const g = useGame();
 
@@ -19,18 +27,27 @@ export default function Game() {
     return () => document.removeEventListener('pointerdown', unlock);
   }, []);
 
-  // floating embers — generated after mount to avoid hydration mismatch
+  // rising fire embers — generated after mount to avoid hydration mismatch;
+  // negative delays mean the field is already populated on first paint
   const [particles, setParticles] = useState([]);
   useEffect(() => {
     setParticles(
-      Array.from({ length: 14 }, (_, i) => ({
-        id: i,
-        left: Math.random() * 100,
-        size: 2 + Math.random() * 4,
-        dur: 14 + Math.random() * 18,
-        delay: -Math.random() * 20,
-        op: 0.1 + Math.random() * 0.2,
-      })),
+      Array.from({ length: 26 }, (_, i) => {
+        const [c, gl] = EMBER_COLORS[i % EMBER_COLORS.length];
+        return {
+          id: i,
+          c,
+          gl,
+          left: Math.random() * 100,
+          size: 3 + Math.random() * 4,
+          dx: Math.random() * 120 - 60, // horizontal drift, px
+          rot: Math.random() * 420 - 210, // tumble, deg
+          op: 0.25 + Math.random() * 0.35, // peak opacity
+          dur: 9 + Math.random() * 13, // seconds to cross the screen
+          delay: -Math.random() * 22, // negative = already mid-flight
+          blur: Math.random() > 0.7, // some sparks are soft = depth
+        };
+      }),
     );
   }, []);
 
@@ -57,7 +74,7 @@ export default function Game() {
         · ARCADE v2
       </footer>
 
-      {/* floating embers */}
+      {/* rising fire embers */}
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
@@ -65,12 +82,15 @@ export default function Game() {
         {particles.map((p) => (
           <span
             key={p.id}
-            className="particle"
+            className={`particle ${p.blur ? 'blur' : ''}`}
             style={{
               left: `${p.left}%`,
-              width: p.size,
-              height: p.size,
-              opacity: p.op,
+              '--c': p.c,
+              '--glow': p.gl,
+              '--sz': `${p.size}px`,
+              '--dx': `${p.dx}px`,
+              '--rot': `${p.rot}deg`,
+              '--op': p.op,
               animationDuration: `${p.dur}s`,
               animationDelay: `${p.delay}s`,
             }}

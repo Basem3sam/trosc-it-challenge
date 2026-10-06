@@ -12,7 +12,7 @@ import {
   SITE_URL,
 } from '@/lib/game';
 
-const TICKER = `TROSC ✦ SUEZ CANAL UNIVERSITY ✦ IT CHALLENGE ✦ ${TOTAL} MONSTERS ✦ POWER-UPS ✦ BEAT YOUR BEST ✦\u00A0`;
+const TICKER = `TROSC ✦ SUEZ CANAL UNIVERSITY ✦ TROSC CHALLENGE ✦ ${TOTAL} MONSTERS ✦ POWER-UPS ✦ BEAT YOUR BEST ✦\u00A0`;
 
 export default function WelcomeScreen({ best, onStart }) {
   const [name, setName] = useState('');
@@ -83,7 +83,7 @@ export default function WelcomeScreen({ best, onStart }) {
         id="welcome-title"
         className="mb-3 font-display text-[clamp(2.5rem,13vw,4rem)] leading-[1.05]"
       >
-        IT
+        TROSC
         <br />
         <span className="text-gradient">Challenge</span>
         <span
@@ -132,8 +132,10 @@ export default function WelcomeScreen({ best, onStart }) {
         </button>
       </form>
 
-      <p className="mt-5 font-mono text-[0.7rem] tracking-[0.14em] text-dust">
-        NO SIGN-UP · ~3 MIN · {HEARTS_MAX} HEARTS — DON&apos;T LOSE THEM ALL
+      <p className="mt-5 font-mono text-[0.7rem] leading-relaxed tracking-[0.14em] text-dust">
+        NO SIGN-UP · ~3 MIN · {HEARTS_MAX} HEARTS
+        <br />
+        EVERY {POWERUP_EVERY} CORRECT IN A ROW = POWER-UP
       </p>
 
       {best !== null && (
@@ -144,24 +146,64 @@ export default function WelcomeScreen({ best, onStart }) {
 
       {/* how to play */}
       <div className="mt-5 rounded-[14px] border border-edge bg-panel p-4">
-        <p className="mb-2.5 font-mono text-[0.66rem] tracking-[0.2em] text-dust">
+        <p className="mb-3 font-mono text-[0.66rem] tracking-[0.2em] text-dust">
           HOW TO PLAY
         </p>
-        <ul className="grid gap-2 text-[0.9rem] text-dust">
+        <ul className="grid gap-2.5 text-[0.9rem] text-dust">
           <li className="flex items-center gap-2.5">
             <Icon name="sword" className="h-4 w-4 shrink-0 text-blood" />
-            Answer correctly to attack — every {POWERUP_EVERY}rd correct earns a
-            POWER-UP
+            Answer correctly to attack the monster
+          </li>
+          <li className="flex items-center gap-2.5">
+            <Icon name="bolt" className="h-4 w-4 shrink-0 text-gold" />
+            <span>
+              Every{' '}
+              <b className="text-cream">
+                {POWERUP_EVERY} correct answers in a row
+              </b>{' '}
+              earn a random POWER-UP
+            </span>
           </li>
           <li className="flex items-center gap-2.5">
             <HeartIcon className="h-4 w-4 shrink-0 text-blood" />
             Wrong answers and timeouts cost a heart — you have {HEARTS_MAX}
           </li>
           <li className="flex items-center gap-2.5">
-            <Icon name="snow" className="h-4 w-4 shrink-0 text-gold" />
-            Use 50/50 and FREEZE wisely… the boss is waiting at the end
+            <Icon name="trophy" className="h-4 w-4 shrink-0 text-gold" />
+            Beat all {TOTAL} levels — the FINAL BOSS guards the last one
           </li>
         </ul>
+
+        {/* power-up legend */}
+        <div className="mt-4 grid grid-cols-3 gap-2 border-t border-dashed border-edge pt-3">
+          <div className="rounded-xl border border-edge bg-panel2 p-2.5 text-center">
+            <Icon name="cut" className="mx-auto h-4 w-4 text-gold" />
+            <p className="mt-1 font-mono text-[0.62rem] font-bold tracking-[0.08em] text-cream">
+              50/50
+            </p>
+            <p className="mt-0.5 text-[0.68rem] leading-tight text-dust">
+              cuts 2 wrong answers
+            </p>
+          </div>
+          <div className="rounded-xl border border-edge bg-panel2 p-2.5 text-center">
+            <Icon name="snow" className="mx-auto h-4 w-4 text-gold" />
+            <p className="mt-1 font-mono text-[0.62rem] font-bold tracking-[0.08em] text-cream">
+              FREEZE
+            </p>
+            <p className="mt-0.5 text-[0.68rem] leading-tight text-dust">
+              stops the clock
+            </p>
+          </div>
+          <div className="rounded-xl border border-edge bg-panel2 p-2.5 text-center">
+            <Icon name="shield" className="mx-auto h-4 w-4 text-gold" />
+            <p className="mt-1 font-mono text-[0.62rem] font-bold tracking-[0.08em] text-cream">
+              SHIELD
+            </p>
+            <p className="mt-0.5 text-[0.68rem] leading-tight text-dust">
+              blocks one hit — automatic
+            </p>
+          </div>
+        </div>
       </div>
 
       <a

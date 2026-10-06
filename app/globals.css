@@ -315,14 +315,6 @@
     background-position: 200% center;
   }
 }
-@keyframes floaty {
-  from {
-    transform: translateY(105vh);
-  }
-  to {
-    transform: translateY(-10vh);
-  }
-}
 
 /* ==========================================================================
    Base
@@ -401,13 +393,44 @@ body::before {
   animation: gradSlide 3s linear infinite;
 }
 
-/* floating ember particles */
+/* --------------------------------------------------------------------------
+   Rising fire embers — square sparks, drift + tumble, smooth fade in/out.
+   Each particle is configured with CSS vars set from JS:
+   --c color · --glow glow color · --sz size · --dx horizontal drift
+   --rot tumble · --op peak opacity
+   -------------------------------------------------------------------------- */
 .particle {
   position: absolute;
-  bottom: -10px;
-  border-radius: 50%;
-  background: #ff4655;
-  animation: floaty linear infinite;
+  bottom: -14px;
+  width: var(--sz, 4px);
+  height: var(--sz, 4px);
+  background: var(--c, #ff4655);
+  border-radius: 1px;
+  box-shadow: 0 0 7px var(--glow, rgba(255, 70, 85, 0.75));
+  opacity: 0;
+  animation: riseFade linear infinite;
+  will-change: transform, opacity;
+}
+.particle.blur {
+  filter: blur(1.5px);
+}
+
+@keyframes riseFade {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  7% {
+    opacity: var(--op, 0.45);
+  }
+  82% {
+    opacity: var(--op, 0.45);
+  }
+  100% {
+    transform: translate3d(var(--dx, 30px), -110vh, 0)
+      rotate(var(--rot, 180deg));
+    opacity: 0;
+  }
 }
 
 /* CRT arcade overlay — scanlines + soft vignette */

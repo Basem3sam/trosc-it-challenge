@@ -132,9 +132,13 @@ export default function WelcomeScreen({ best, onStart }) {
         </button>
       </form>
 
-      <p className="mt-5 flex flex-nowrap items-baseline justify-between gap-2 whitespace-nowrap font-mono text-[clamp(0.5rem,2.5vw,0.72rem)] text-dust">
-        <span>NO SIGN-UP · ~3 MIN · {HEARTS_MAX} HEARTS</span>
-        <span>EVERY {POWERUP_EVERY} IN A ROW = POWER-UP</span>
+      <p className="mt-5 flex flex-wrap justify-center gap-x-2 gap-y-0.5 text-center font-mono text-[0.58rem] text-dust sm:flex-nowrap sm:justify-between sm:items-baseline sm:text-[clamp(0.5rem,2.5vw,0.72rem)]">
+        <span className="whitespace-nowrap">
+          NO SIGN-UP · ~3 MIN · {HEARTS_MAX} HEARTS
+        </span>
+        <span className="whitespace-nowrap">
+          EVERY {POWERUP_EVERY} IN A ROW = POWER-UP
+        </span>
       </p>
 
       {best !== null && (

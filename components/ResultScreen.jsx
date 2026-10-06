@@ -84,6 +84,41 @@ export default function ResultScreen({ g }) {
   const { attempted, pct, by, stats, badges } = g.result;
   const tier = won ? tierFor(g.score) : null;
 
+  /* badges + rank share one centered row */
+  const honorItems = won
+    ? [
+        ...(badges || []).map((b) => (
+          <span
+            key={b.label}
+            className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 font-mono text-[0.7rem] tracking-[0.12em] text-gold"
+          >
+            <Icon name={b.icon} className="h-3.5 w-3.5" /> {b.label}
+          </span>
+        )),
+        <span
+          key="rank"
+          className="animate-rank-in inline-flex items-center gap-2.5 rounded-full border border-gold/45 bg-gold/10 px-4 py-1.5 font-mono text-[0.84rem] tracking-[0.14em] text-gold"
+        >
+          <Icon name="trophy" className="h-5 w-5" />
+          <b
+            className={`font-display text-2xl ${tier.rank === 'S' ? 'text-gold [text-shadow:0_0_18px_rgba(255,197,61,.65)]' : ''}`}
+          >
+            {tier.rank}
+          </b>
+          <span>RANK · {tier.title}</span>
+        </span>,
+      ]
+    : [
+        <span
+          key="rank-lost"
+          className="animate-rank-in inline-flex items-center gap-2.5 rounded-full border border-blood/45 bg-blood/10 px-4 py-1.5 font-mono text-[0.84rem] tracking-[0.14em] text-blood"
+        >
+          <Icon name="skull" className="h-5 w-5" />
+          <b className="font-display text-2xl">F</b>
+          <span>RANK · DEFEATED</span>
+        </span>,
+      ];
+
   return (
     <section aria-labelledby="result-kicker" className="w-full text-center">
       <h1
@@ -137,40 +172,10 @@ export default function ResultScreen({ g }) {
         </p>
       )}
 
-      {badges && badges.length > 0 && (
-        <div className="mt-3 flex flex-wrap justify-center gap-2">
-          {badges.map((b) => (
-            <span
-              key={b.label}
-              className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 font-mono text-[0.7rem] tracking-[0.12em] text-gold"
-            >
-              <Icon name={b.icon} className="h-3.5 w-3.5" /> {b.label}
-            </span>
-          ))}
-        </div>
-      )}
-
-      <p
-        className={`mx-auto mt-3 flex w-fit items-center gap-2.5 rounded-full border px-4 py-2 font-mono text-[0.84rem] tracking-[0.14em] ${won ? 'animate-rank-in border-gold/45 bg-gold/10 text-gold' : 'border-blood/45 bg-blood/10 text-blood'}`}
-      >
-        {won ? (
-          <>
-            <Icon name="trophy" className="h-5 w-5" />
-            <b
-              className={`font-display text-2xl ${tier.rank === 'S' ? 'text-gold [text-shadow:0_0_18px_rgba(255,197,61,.65)]' : ''}`}
-            >
-              {tier.rank}
-            </b>
-            <span>RANK · {tier.title}</span>
-          </>
-        ) : (
-          <>
-            <Icon name="skull" className="h-5 w-5" />
-            <b className="font-display text-2xl">F</b>
-            <span>RANK · DEFEATED</span>
-          </>
-        )}
-      </p>
+      {/* badges + rank side by side in one centered row */}
+      <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+        {honorItems}
+      </div>
 
       <p className="mx-auto mt-3 flex w-fit items-center gap-2.5 rounded-[18px] border border-edge bg-panel px-4 py-2.5 text-left text-[1.05rem] font-semibold">
         <Icon name={won ? tier.icon : 'skull'} className="h-5 w-5 text-blood" />

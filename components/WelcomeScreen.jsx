@@ -14,6 +14,9 @@ import {
 
 const TICKER = `TROSC ✦ SUEZ CANAL UNIVERSITY ✦ TROSC CHALLENGE ✦ ${TOTAL} MONSTERS ✦ POWER-UPS ✦ BEAT YOUR BEST ✦\u00A0`;
 
+/* stagger helper */
+const rise = (i) => ({ animationDelay: `${i * 70}ms` });
+
 export default function WelcomeScreen({ best, onStart }) {
   const [name, setName] = useState('');
   const [showError, setShowError] = useState(false);
@@ -49,7 +52,10 @@ export default function WelcomeScreen({ best, onStart }) {
       </div>
 
       {/* brand */}
-      <header className="mb-4 flex items-center gap-3">
+      <header
+        className="mb-4 flex items-center gap-3 animate-rise-in"
+        style={rise(0)}
+      >
         {logoOk ? (
           <img
             src="/logo.png"
@@ -76,23 +82,39 @@ export default function WelcomeScreen({ best, onStart }) {
         </span>
       </header>
 
-      <h1
-        id="welcome-title"
-        className="mb-2 font-display text-[clamp(2.2rem,11vw,3.6rem)] leading-[1.05]"
-      >
-        TROSC
-        <br />
-        <span className="text-gradient">Challenge</span>
+      {/* title — blur-rises in, gradient word + scan underline */}
+      <div className="relative mb-1 animate-title-in" style={rise(1)}>
+        <h1
+          id="welcome-title"
+          className="font-display text-[clamp(2.6rem,12vw,4.2rem)] leading-[1.02]"
+        >
+          TROSC
+          <br />
+          <span className="text-gradient">Challenge</span>
+          <span
+            className="ml-1 inline-block h-[0.72em] w-[0.45ch] translate-y-[0.06em] animate-blink bg-blood"
+            aria-hidden="true"
+          />
+        </h1>
         <span
-          className="ml-1 inline-block h-[0.72em] w-[0.45ch] translate-y-[0.06em] animate-blink bg-blood"
           aria-hidden="true"
+          className="mt-2 block h-[3px] w-2/3 rounded-full bg-gradient-to-r from-blood via-gold to-blood bg-[length:200%_100%] [animation:shimmerSweep_2.4s_linear_infinite]"
         />
-      </h1>
-      <p className="mb-5 text-[clamp(1rem,4vw,1.2rem)] text-dust">
+      </div>
+      <p
+        className="mb-5 text-[clamp(1rem,4vw,1.2rem)] text-dust animate-rise-in"
+        style={rise(2)}
+      >
         {TOTAL} monsters. {QUESTION_TIME} seconds each. Slay them all!
       </p>
 
-      <form onSubmit={submit} noValidate className="grid gap-2.5">
+      {/* form */}
+      <form
+        onSubmit={submit}
+        noValidate
+        className="grid gap-2.5 animate-rise-in"
+        style={rise(3)}
+      >
         <label
           htmlFor="name-input"
           className="block font-mono text-[0.78rem] tracking-[0.16em] text-dust"
@@ -129,8 +151,11 @@ export default function WelcomeScreen({ best, onStart }) {
         </button>
       </form>
 
-      {/* meta — left/right one-line row, wraps centered under 330px */}
-      <p className="mt-4 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-0.5 text-center font-mono text-[0.58rem] text-dust sm:flex-nowrap sm:justify-between sm:text-[clamp(0.5rem,2.5vw,0.72rem)]">
+      {/* meta — left/right one-line row, wraps centered on tiny screens */}
+      <p
+        className="mt-4 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-0.5 text-center font-mono text-[0.58rem] text-dust animate-rise-in sm:flex-nowrap sm:justify-between sm:text-[clamp(0.5rem,2.5vw,0.72rem)]"
+        style={rise(4)}
+      >
         <span className="whitespace-nowrap">
           NO SIGN-UP · ~3 MIN · {HEARTS_MAX} HEARTS
         </span>
@@ -140,13 +165,19 @@ export default function WelcomeScreen({ best, onStart }) {
       </p>
 
       {best !== null && (
-        <p className="mx-auto mt-3 flex w-fit items-center gap-2 rounded-full border border-gold/35 bg-gold/10 px-3.5 py-2 font-mono text-[0.72rem] tracking-[0.14em] text-gold">
+        <p
+          className="mx-auto mt-3 flex w-fit items-center gap-2 rounded-full border border-gold/35 bg-gold/10 px-3.5 py-2 font-mono text-[0.72rem] tracking-[0.14em] text-gold animate-rise-in"
+          style={rise(5)}
+        >
           <Icon name="trophy" className="h-4 w-4" /> YOUR BEST: {best}/{TOTAL}
         </p>
       )}
 
-      {/* how to play — collapsible so the screen stays clean */}
-      <details className="mt-4 rounded-[14px] border border-edge bg-panel">
+      {/* how to play — collapsible */}
+      <details
+        className="mt-4 rounded-[14px] border border-edge bg-panel animate-rise-in"
+        style={rise(6)}
+      >
         <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 font-mono text-[0.7rem] font-bold tracking-[0.2em] text-dust transition-colors hover:text-cream">
           HOW TO PLAY
           <span
@@ -214,33 +245,35 @@ export default function WelcomeScreen({ best, onStart }) {
         </div>
       </details>
 
-      <a
-        href={JOIN_FORM_URL}
-        target="_blank"
-        rel="noopener"
-        className={`${BTN_GHOST} mt-4`}
-      >
-        Join TROSC Community <Icon name="external" className="h-5 w-5" />
-      </a>
+      <div className="animate-rise-in" style={rise(7)}>
+        <a
+          href={JOIN_FORM_URL}
+          target="_blank"
+          rel="noopener"
+          className={`${BTN_GHOST} mt-4`}
+        >
+          Join TROSC Community <Icon name="external" className="h-5 w-5" />
+        </a>
 
-      <a
-        href={SITE_URL}
-        target="_blank"
-        rel="noopener"
-        aria-label="TROSC website — under construction"
-        className="mt-4 flex flex-col gap-1.5 rounded-[14px] border border-dashed border-edge bg-panel p-3.5 no-underline transition hover:-translate-y-0.5 hover:border-blood"
-      >
-        <span className="inline-flex w-fit items-center gap-2 font-mono text-[0.66rem] tracking-[0.18em] text-blood">
-          <span className="h-2 w-2 animate-live rounded-full bg-blood" /> UNDER
-          CONSTRUCTION
-        </span>
-        <p className="text-[0.92rem] text-dust">
-          The official <strong className="text-cream">TROSC website</strong> is
-          being built at{' '}
-          <span className="font-mono text-blood">trosc.vercel.app</span> — tap
-          to peek!
-        </p>
-      </a>
+        <a
+          href={SITE_URL}
+          target="_blank"
+          rel="noopener"
+          aria-label="TROSC website — under construction"
+          className="mt-4 flex flex-col gap-1.5 rounded-[14px] border border-dashed border-edge bg-panel p-3.5 no-underline transition hover:-translate-y-0.5 hover:border-blood"
+        >
+          <span className="inline-flex w-fit items-center gap-2 font-mono text-[0.66rem] tracking-[0.18em] text-blood">
+            <span className="h-2 w-2 animate-live rounded-full bg-blood" />{' '}
+            UNDER CONSTRUCTION
+          </span>
+          <p className="text-[0.92rem] text-dust">
+            The official <strong className="text-cream">TROSC website</strong>{' '}
+            is being built at{' '}
+            <span className="font-mono text-blood">trosc.vercel.app</span> — tap
+            to peek!
+          </p>
+        </a>
+      </div>
     </section>
   );
 }

@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 /* ==========================================================================
-   Design tokens — Tailwind v4 theme (generates bg-blood, text-gold, etc.)
+   Design tokens — Tailwind v4 theme
    ========================================================================== */
 @theme {
   --color-night: #140a0e;
@@ -25,9 +25,8 @@
   --animate-bob: bob 2.4s ease-in-out infinite;
   --animate-furious: furious 0.25s linear infinite;
   --animate-stamp: stamp 0.35s ease;
-  --animate-card-in: cardIn 0.3s ease both;
-  --animate-screen-in: screenIn 0.4s ease both;
-  /* scale+fade entrance — never extends the page, so nothing can peek */
+  --animate-card-in: cardIn 0.35s ease both;
+  --animate-screen-in: screenIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-screen-in-soft: screenInSoft 0.35s ease both;
   --animate-blink: blink 1.1s steps(2, start) infinite;
   --animate-marquee: marquee 22s linear infinite;
@@ -41,7 +40,7 @@
   --animate-shake: shake 0.4s ease;
   --animate-hit: hitflash 0.3s ease;
   --animate-lunge: lunge 0.5s ease;
-  --animate-die: die 0.5s ease forwards;
+  --animate-die: die 0.6s ease forwards;
   --animate-heart-break: heartBreak 0.55s ease both;
   --animate-rise: rise 0.9s ease-out forwards;
   --animate-burst: burst 0.6s ease-out forwards;
@@ -52,13 +51,13 @@
   --animate-intro: introIn 0.9s cubic-bezier(0.2, 1.4, 0.4, 1) both;
   --animate-flash: flashOut 0.22s ease-out both;
   --animate-frost: frostPulse 1.6s ease-in-out infinite;
-  /* glows hug the icon's shape (drop-shadow) — never a box around text */
   --animate-icon-glow: iconGlow 1.5s ease-in-out infinite;
-  /* available power-ups breathe via border/bg color — no floating box glow */
   --animate-usable: usablePulse 1.4s ease-in-out infinite;
-  /* entrance polish */
-  --animate-opt-in: optIn 0.35s ease both;
+  --animate-opt-in: optIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-dot-pop: dotPop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  --animate-title-in: titleIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-rise-in: riseIn 0.5s ease both;
+  --animate-fall-out: fallOut 0.6s ease forwards;
 }
 
 /* Keyframes */
@@ -97,7 +96,7 @@
 @keyframes cardIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: perspective(600px) rotateX(6deg) translateY(14px);
   }
   to {
     opacity: 1;
@@ -107,7 +106,7 @@
 @keyframes screenIn {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(24px) scale(0.985);
   }
   to {
     opacity: 1;
@@ -217,8 +216,21 @@
   }
 }
 @keyframes die {
-  to {
-    transform: translateY(26px) rotate(80deg);
+  0% {
+    transform: none;
+    opacity: 1;
+    filter: brightness(2.5);
+  }
+  25% {
+    transform: translate(-4px, 2px) rotate(-6deg);
+    filter: brightness(2.2);
+  }
+  50% {
+    transform: translate(4px, 8px) rotate(6deg);
+    filter: brightness(1);
+  }
+  100% {
+    transform: translateY(30px) rotate(84deg) scale(0.92);
     opacity: 0;
   }
 }
@@ -379,6 +391,37 @@
     background-position: -200% 0;
   }
 }
+@keyframes titleIn {
+  0% {
+    opacity: 0;
+    transform: translateY(26px) scale(0.94);
+    filter: blur(6px);
+  }
+  60% {
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fallOut {
+  to {
+    transform: translateY(24px) rotate(6deg);
+    opacity: 0;
+  }
+}
 
 /* ==========================================================================
    Base
@@ -386,9 +429,6 @@
 html {
   -webkit-text-size-adjust: 100%;
 }
-
-/* never allow horizontal overflow from animations or long content —
-   `clip` (not `hidden`) also removes programmatic sideways scrolling */
 html,
 body {
   overflow-x: clip;
@@ -403,7 +443,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* slim, dark scrollbar on desktop — part of the theme instead of a grey bar */
+/* slim themed scrollbar for the desktop page */
 @media (pointer: fine) {
   ::-webkit-scrollbar {
     width: 10px;
@@ -425,7 +465,6 @@ body {
   background: var(--color-blood);
   color: var(--color-bloodink);
 }
-
 :focus-visible {
   outline: 3px solid var(--color-blood);
   outline-offset: 3px;
@@ -453,7 +492,6 @@ body::before {
   );
 }
 
-/* striped XP-style fills */
 .stripes {
   background-image: repeating-linear-gradient(
     90deg,
@@ -462,7 +500,6 @@ body::before {
   );
 }
 
-/* HP-bar shine sweep — add .shimmer to any fill */
 .shimmer {
   position: relative;
 }
@@ -482,7 +519,6 @@ body::before {
   pointer-events: none;
 }
 
-/* sticky next-button fade (desktop: no fade) */
 .dock-fade {
   background: linear-gradient(to top, var(--color-night) 68%, transparent);
 }
@@ -492,7 +528,6 @@ body::before {
   }
 }
 
-/* animated gradient title */
 .text-gradient {
   background: linear-gradient(90deg, #ff4655, #ffc53d, #ff4655);
   background-size: 200% auto;
@@ -503,7 +538,30 @@ body::before {
 }
 
 /* --------------------------------------------------------------------------
-   Rising fire embers — square sparks, drift + tumble, smooth fade in/out.
+   Battle scroller — thin retro scrollbar on the INNER question scroller
+   -------------------------------------------------------------------------- */
+.battle-scroll {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-edge) transparent;
+}
+.battle-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.battle-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.battle-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-edge);
+  border-radius: 999px;
+}
+.battle-scroll::-webkit-scrollbar-thumb:hover {
+  background: #5a3441;
+}
+
+/* -------------------------------------------------------------------------- 
+   Rising fire embers
    -------------------------------------------------------------------------- */
 .particle {
   position: absolute;
@@ -539,7 +597,6 @@ body::before {
   }
 }
 
-/* CRT arcade overlay — scanlines + soft vignette */
 .crt-layer {
   position: fixed;
   inset: 0;
@@ -558,11 +615,7 @@ body::before {
     );
 }
 
-/* --------------------------------------------------------------------------
-   Monster battle stage — spotlight behind + ground shadow below.
-   The ARENA clips these (overflow-hidden set in JSX), so the glow can never
-   spill outside the rounded container.
-   -------------------------------------------------------------------------- */
+/* Monster battle stage — clipped by the arena card in JSX */
 .monster {
   position: relative;
 }
@@ -600,7 +653,6 @@ body::before {
   pointer-events: none;
 }
 
-/* Monster sprite states — order matters: later rules win */
 .monster svg {
   animation: bob 2.4s ease-in-out infinite;
 }
@@ -621,18 +673,10 @@ body::before {
   animation: lunge 0.5s ease;
 }
 .monster.dead svg {
-  animation: die 0.5s ease forwards;
+  animation: die 0.6s ease forwards;
 }
 .monster.boss svg {
   filter: drop-shadow(0 0 14px rgba(255, 70, 85, 0.55));
-}
-
-/* retro collapsible — hide the default triangle */
-summary::-webkit-details-marker {
-  display: none;
-}
-summary {
-  list-style: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

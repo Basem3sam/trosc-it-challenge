@@ -12,7 +12,6 @@ import {
   POWERUP_EVERY,
 } from '@/lib/game';
 
-/* playful Kahoot-style key colors (on the TROSC palette) */
 const KEY_TONES = [
   'bg-blood/15 text-blood border-blood/40',
   'bg-gold/15 text-gold border-gold/40',
@@ -68,7 +67,6 @@ function TimerRow({ remaining, total, warn, danger, frozen, frozenLeft }) {
   );
 }
 
-/* Real button: 3D press + breathing border when available */
 function PowerButton({ icon, label, hint, count, disabled, onClick }) {
   return (
     <button
@@ -101,7 +99,6 @@ function PowerButton({ icon, label, hint, count, disabled, onClick }) {
   );
 }
 
-/* Stat tile: single-line pill, icon circle + label. Flat — clearly info. */
 function NextPowerChip({ combo, every }) {
   const filled = combo % every;
   const dots = '●'.repeat(filled) + '○'.repeat(every - filled);
@@ -195,7 +192,7 @@ function Option({ i, text, correct, chosen, locked, cut, onPick }) {
       onClick={onPick}
       disabled={locked || isCut}
       style={{ animationDelay: `${i * 60}ms` }}
-      className={`group flex min-h-[60px] w-full items-center gap-3.5 rounded-xl border-[1.5px] bg-panel2 px-4 py-2.5 text-left font-medium leading-snug text-cream transition active:scale-[.97] disabled:cursor-default md:min-h-[72px] animate-opt-in ${cls} ${locked && isChosen ? 'animate-stamp' : ''}`}
+      className={`group flex min-h-[58px] w-full items-center gap-3.5 rounded-xl border-[1.5px] bg-panel2 px-4 py-2.5 text-left font-medium leading-snug text-cream transition active:scale-[.97] disabled:cursor-default md:min-h-[70px] animate-opt-in ${cls} ${locked && isChosen ? 'animate-stamp' : ''}`}
     >
       <span
         className={`grid h-[34px] w-[34px] shrink-0 place-items-center rounded-lg border font-mono text-sm font-bold transition-transform group-hover:scale-110 ${keyCls}`}
@@ -228,7 +225,7 @@ export default function BattleScreen({ g }) {
   const enemyDown = g.monsterPhase === 'hit' || g.monsterPhase === 'dead';
   const lastLevel = g.index === g.total - 1;
 
-  /* the question/report area scrolls internally — never the page */
+  /* the OPTION LIST + report scroll internally — question text is fixed chrome */
   const scrollRef = useRef(null);
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
@@ -282,7 +279,7 @@ export default function BattleScreen({ g }) {
         </div>
       </header>
 
-      {/* THE ARENA — glow clipped inside the card */}
+      {/* ARENA */}
       <div
         className={`relative mb-2 shrink-0 overflow-hidden rounded-2xl border border-edge bg-panel px-4 pb-3.5 pt-3 ${g.arenaShake ? 'animate-shake' : ''}`}
       >
@@ -395,39 +392,44 @@ export default function BattleScreen({ g }) {
         </div>
       </div>
 
-      {/* question + battle report — the ONLY scrolling region */}
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
-        <article
-          key={g.index}
-          className={`animate-card-in rounded-2xl border border-edge bg-panel p-[clamp(1rem,3.6vw,1.6rem)] ${g.cardShake ? 'animate-shake' : ''}`}
+      {/* QUESTION — fixed chrome, always visible */}
+      <article
+        key={g.index}
+        className={`shrink-0 animate-card-in rounded-2xl border border-edge bg-panel p-[clamp(0.95rem,3.4vw,1.4rem)] ${g.cardShake ? 'animate-shake' : ''}`}
+      >
+        <h2
+          id="question-text"
+          className="text-[clamp(1.15rem,4.6vw,1.5rem)] font-bold leading-snug tracking-tight"
         >
-          <h2
-            id="question-text"
-            className="mb-3 text-[clamp(1.2rem,5vw,1.6rem)] font-bold leading-snug tracking-tight"
-          >
-            {q.question}
-          </h2>
-          <div className="grid gap-2">
-            {q.options.map((opt, i) => (
-              <Option
-                key={i}
-                i={i}
-                text={opt}
-                correct={q.correctAnswer}
-                chosen={chosen}
-                locked={g.locked}
-                cut={g.eliminated}
-                onPick={() => g.chooseAnswer(i)}
-              />
-            ))}
-          </div>
-        </article>
+          {q.question}
+        </h2>
+      </article>
+
+      {/* OPTIONS + battle report — the ONLY scrolling region (thin retro scrollbar) */}
+      <div
+        ref={scrollRef}
+        className="battle-scroll min-h-0 flex-1 overflow-y-auto pt-2.5"
+      >
+        <div className="grid gap-2 pb-2.5">
+          {q.options.map((opt, i) => (
+            <Option
+              key={i}
+              i={i}
+              text={opt}
+              correct={q.correctAnswer}
+              chosen={chosen}
+              locked={g.locked}
+              cut={g.eliminated}
+              onPick={() => g.chooseAnswer(i)}
+            />
+          ))}
+        </div>
 
         {g.feedback && (
           <div
             role="status"
             aria-live="polite"
-            className={`animate-card-in mb-2 mt-2.5 rounded-xl border p-3.5 ${g.feedback.ok ? 'border-blood/45 bg-blood/10' : 'border-frost/45 bg-frost/10'}`}
+            className={`animate-card-in mb-2 rounded-xl border p-3.5 ${g.feedback.ok ? 'border-blood/45 bg-blood/10' : 'border-frost/45 bg-frost/10'}`}
           >
             <div className="flex items-start gap-3">
               <span
@@ -460,7 +462,7 @@ export default function BattleScreen({ g }) {
         )}
       </div>
 
-      {/* CTA — always visible, bottom of the fixed layout */}
+      {/* CTA — always visible */}
       <div className="shrink-0 pb-[calc(0.6rem+env(safe-area-inset-bottom))] pt-2">
         <button
           onClick={g.handleNext}

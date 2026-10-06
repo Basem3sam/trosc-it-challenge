@@ -132,14 +132,13 @@ export default function WelcomeScreen({ best, onStart }) {
         </button>
       </form>
 
-      <p className="mt-5 font-mono text-[0.7rem] leading-relaxed tracking-[0.14em] text-dust">
-        NO SIGN-UP · ~3 MIN · {HEARTS_MAX} HEARTS
-        <br />
-        EVERY {POWERUP_EVERY} CORRECT IN A ROW = POWER-UP
+      <p className="mt-5 text-center font-mono text-[0.7rem] tracking-[0.1em] text-dust">
+        NO SIGN-UP · ~3 MIN · {HEARTS_MAX} HEARTS · EVERY {POWERUP_EVERY} IN A
+        ROW = POWER-UP
       </p>
 
       {best !== null && (
-        <p className="mt-3 inline-flex w-fit items-center gap-2 rounded-full border border-gold/35 bg-gold/10 px-3.5 py-2 font-mono text-[0.72rem] tracking-[0.14em] text-gold">
+        <p className="mx-auto mt-3 flex w-fit items-center gap-2 rounded-full border border-gold/35 bg-gold/10 px-3.5 py-2 font-mono text-[0.72rem] tracking-[0.14em] text-gold">
           <Icon name="trophy" className="h-4 w-4" /> YOUR BEST: {best}/{TOTAL}
         </p>
       )}

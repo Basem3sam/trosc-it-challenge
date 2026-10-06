@@ -58,12 +58,12 @@ export default function WelcomeScreen({ best, onStart }) {
             src="/logo.png"
             alt="TROSC logo"
             onError={() => setLogoOk(false)}
-            className="h-[52px] w-[52px] rounded-[14px] border border-edge bg-panel object-contain p-1"
+            className="h-[52px] w-[52px] animate-bob rounded-[14px] border border-edge bg-panel object-contain p-1"
           />
         ) : (
           <span
             aria-hidden="true"
-            className="grid h-[52px] w-[52px] place-items-center rounded-[14px] border border-edge bg-blood/10 font-display text-2xl text-blood"
+            className="grid h-[52px] w-[52px] animate-bob place-items-center rounded-[14px] border border-edge bg-blood/10 font-display text-2xl text-blood"
           >
             T
           </span>

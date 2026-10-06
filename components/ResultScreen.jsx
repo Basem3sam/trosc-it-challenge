@@ -165,7 +165,11 @@ export default function ResultScreen({ g }) {
         {won ? (
           <>
             <Icon name="trophy" className="h-5 w-5" />
-            <b className="font-display text-2xl">{tier.rank}</b>
+            <b
+              className={`font-display text-2xl ${tier.rank === 'S' ? 'text-gold [text-shadow:0_0_18px_rgba(255,197,61,.65)]' : ''}`}
+            >
+              {tier.rank}
+            </b>
             <span>RANK · {tier.title}</span>
           </>
         ) : (

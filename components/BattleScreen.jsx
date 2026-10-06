@@ -11,6 +11,14 @@ import {
   POWERUP_EVERY,
 } from '@/lib/game';
 
+/* playful Kahoot-style key colors (staying on the TROSC palette) */
+const KEY_TONES = [
+  'bg-blood/15 text-blood border-blood/40',
+  'bg-gold/15 text-gold border-gold/40',
+  'bg-[#B388FF]/15 text-[#C9B0FF] border-[#B388FF]/40',
+  'bg-[#4DD0E1]/15 text-[#7FE0EC] border-[#4DD0E1]/40',
+];
+
 function Hearts({ hearts, brokeAt, max }) {
   return (
     <div className="flex gap-1.5">
@@ -59,8 +67,8 @@ function TimerRow({ remaining, total, warn, danger, frozen, frozenLeft }) {
   );
 }
 
-/* A real button: 3D press like the primary CTA, hint line, pulse when usable */
-function PowerButton({ icon, label, hint, count, usable, disabled, onClick }) {
+/* Real button: 3D press + hint line + breathing border when available */
+function PowerButton({ icon, label, hint, count, disabled, onClick }) {
   return (
     <button
       type="button"
@@ -71,9 +79,8 @@ function PowerButton({ icon, label, hint, count, usable, disabled, onClick }) {
         ${
           disabled
             ? 'cursor-default border-edge bg-panel2 text-dust opacity-50'
-            : 'border-gold/50 bg-gold/12 text-gold shadow-[0_3px_0_#8A6A1E] hover:-translate-y-0.5 active:translate-y-[2px] active:shadow-[0_1px_0_#8A6A1E]'
-        }
-        ${usable ? 'animate-shieldpulse' : ''}`}
+            : 'animate-usable text-gold shadow-[0_3px_0_#8A6A1E] hover:-translate-y-0.5 active:translate-y-[2px] active:shadow-[0_1px_0_#8A6A1E]'
+        }`}
     >
       <Icon name={icon} className="h-5 w-5 shrink-0" />
       <span className="flex flex-col leading-tight">
@@ -93,8 +100,9 @@ function PowerButton({ icon, label, hint, count, usable, disabled, onClick }) {
   );
 }
 
-/* Status as HUD text — borderless, clearly NOT tappable */
-function NextPowerMeter({ combo, every }) {
+/* Stat tile: content-hugging pill, icon circle, 2-line label.
+   Flat (no 3D shadow, no press) — reads as info, never as a button. */
+function NextPowerChip({ combo, every }) {
   const filled = combo % every;
   const dots = '●'.repeat(filled) + '○'.repeat(every - filled);
   const hot = filled === every - 1;
@@ -102,32 +110,52 @@ function NextPowerMeter({ combo, every }) {
     <span
       title={`Every ${every} correct answers in a row earn a power-up`}
       aria-label={`Streak ${filled} of ${every} toward the next power-up`}
-      className={`ml-auto inline-flex items-center gap-1.5 font-mono text-[0.72rem] font-bold tracking-[0.12em] ${hot ? 'animate-shieldpulse text-gold' : 'text-dust'}`}
+      className={`inline-flex items-center gap-2 rounded-full py-1 pl-1.5 pr-3 font-mono ${hot ? 'bg-gold/12 text-gold' : 'bg-panel2 text-dust'}`}
     >
-      <Icon name="bolt" className="h-4 w-4" />
-      <span className="opacity-80">NEXT</span>
-      <span aria-hidden="true">{dots}</span>
+      <span
+        className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${hot ? 'bg-gold/20' : 'bg-edge/50'}`}
+      >
+        <Icon
+          name="bolt"
+          className={`h-4 w-4 ${hot ? 'animate-icon-glow text-gold' : 'text-dust'}`}
+        />
+      </span>
+      <span className="leading-tight">
+        <span className="block text-[0.55rem] font-bold tracking-[0.18em] opacity-70">
+          {hot ? 'POWER-UP IN…' : 'NEXT POWER-UP'}
+        </span>
+        <span aria-hidden="true" className="block text-[0.8rem]">
+          {dots}
+        </span>
+      </span>
     </span>
   );
 }
 
-function ShieldStatus({ active }) {
-  if (active) {
-    return (
-      <span
-        className="inline-flex items-center gap-1.5 font-mono text-[0.72rem] font-bold tracking-[0.12em] text-gold animate-shieldpulse"
-        title="Shield active — your next mistake is free"
-      >
-        <Icon name="shield" className="h-4 w-4" /> SHIELD ON
-      </span>
-    );
-  }
+function ShieldChip({ active }) {
   return (
     <span
-      className="inline-flex items-center gap-1.5 font-mono text-[0.72rem] tracking-[0.12em] text-dust opacity-70"
-      title="No shield — earn one with a 3-answer streak"
+      title={
+        active
+          ? 'Shield active — your next mistake is free'
+          : 'No shield — earn one with a 3-answer streak'
+      }
+      className={`inline-flex items-center gap-2 rounded-full py-1 pl-1.5 pr-3 font-mono ${active ? 'bg-gold/12 text-gold' : 'bg-panel2 text-dust opacity-80'}`}
     >
-      <Icon name="shield" className="h-4 w-4" /> SHIELD —
+      <span
+        className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${active ? 'bg-gold/20' : 'bg-edge/50'}`}
+      >
+        <Icon
+          name="shield"
+          className={`h-4 w-4 ${active ? 'animate-icon-glow text-gold' : 'text-dust'}`}
+        />
+      </span>
+      <span className="leading-tight">
+        <span className="block text-[0.55rem] font-bold tracking-[0.18em] opacity-70">
+          SHIELD
+        </span>
+        <span className="block text-[0.8rem]">{active ? 'ACTIVE' : 'OFF'}</span>
+      </span>
     </span>
   );
 }
@@ -138,7 +166,7 @@ function Option({ i, text, correct, chosen, locked, cut, onPick }) {
   const isCut = cut.includes(i);
 
   let cls = 'border-edge hover:border-[#5C3542]';
-  let keyCls = 'border-edge text-dust';
+  let keyCls = KEY_TONES[i];
   let state = null;
 
   if (locked) {
@@ -148,14 +176,19 @@ function Option({ i, text, correct, chosen, locked, cut, onPick }) {
       state = 'yes';
     } else if (isCorrect) {
       cls = 'border-blood';
+      keyCls = 'border-blood bg-blood text-bloodink';
       state = 'reveal';
     } else if (isChosen) {
       cls = 'border-frost bg-frost/10';
       keyCls = 'border-frost bg-frost text-frostink';
       state = 'no';
-    } else cls = 'border-edge opacity-50';
+    } else {
+      cls = 'border-edge opacity-50';
+      keyCls = 'border-edge text-dust';
+    }
   } else if (isCut) {
     cls = 'border-edge bg-panel/40 line-through opacity-40';
+    keyCls = 'border-edge text-dust';
   }
 
   return (
@@ -163,10 +196,10 @@ function Option({ i, text, correct, chosen, locked, cut, onPick }) {
       type="button"
       onClick={onPick}
       disabled={locked || isCut}
-      className={`flex min-h-[62px] w-full items-center gap-3.5 rounded-xl border-[1.5px] bg-panel2 px-4 py-3 text-left font-medium leading-snug text-cream transition active:scale-[.97] disabled:cursor-default md:min-h-[76px] ${cls} ${locked && isChosen ? 'animate-stamp' : ''}`}
+      className={`group flex min-h-[62px] w-full items-center gap-3.5 rounded-xl border-[1.5px] bg-panel2 px-4 py-3 text-left font-medium leading-snug text-cream transition active:scale-[.97] disabled:cursor-default md:min-h-[76px] ${cls} ${locked && isChosen ? 'animate-stamp' : ''}`}
     >
       <span
-        className={`grid h-[34px] w-[34px] shrink-0 place-items-center rounded-lg border font-mono text-sm font-bold ${keyCls}`}
+        className={`grid h-[34px] w-[34px] shrink-0 place-items-center rounded-lg border font-mono text-sm font-bold transition-transform group-hover:scale-110 ${keyCls}`}
       >
         {'ABCD'[i]}
       </span>
@@ -238,9 +271,9 @@ export default function BattleScreen({ g }) {
         </div>
       </header>
 
-      {/* THE ARENA */}
+      {/* THE ARENA — spotlit stage */}
       <div
-        className={`relative mb-2 rounded-2xl border border-edge bg-panel px-4 pb-3 pt-3.5 ${g.arenaShake ? 'animate-shake' : ''}`}
+        className={`relative mb-2 rounded-2xl border border-edge bg-panel px-4 pb-4 pt-3.5 ${g.arenaShake ? 'animate-shake' : ''}`}
       >
         <div className="flex items-center gap-3.5">
           <div
@@ -278,10 +311,13 @@ export default function BattleScreen({ g }) {
           <Hearts hearts={g.hearts} brokeAt={g.brokeAt} max={HEARTS_MAX} />
           {g.shieldActive && (
             <span
-              className="animate-shieldpulse ml-1 inline-flex items-center gap-1 font-mono text-[0.6rem] font-bold tracking-[0.1em] text-gold"
+              className="ml-auto inline-flex items-center gap-1 font-mono text-[0.6rem] font-bold tracking-[0.1em] text-gold"
               title="Shield active — next mistake is free"
             >
-              <Icon name="shield" className="h-3.5 w-3.5" /> ON
+              <span className="grid h-5 w-5 place-items-center rounded-full bg-gold/15">
+                <Icon name="shield" className="h-3.5 w-3.5 animate-icon-glow" />
+              </span>
+              ON
             </span>
           )}
         </div>
@@ -324,14 +360,13 @@ export default function BattleScreen({ g }) {
         </p>
       )}
 
-      {/* power-ups (real buttons) + streak & shield (HUD status, not tappable) */}
+      {/* buttons (3D, pressable) vs stat tiles (flat, informative) */}
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <PowerButton
           icon="cut"
           label="50/50"
           hint="cuts 2 wrong"
           count={g.powerups.cut}
-          usable={g.canCut}
           disabled={!g.canCut}
           onClick={g.useCut}
         />
@@ -340,12 +375,12 @@ export default function BattleScreen({ g }) {
           label="FREEZE"
           hint="stops the clock"
           count={g.powerups.freeze}
-          usable={g.canFreeze}
           disabled={!g.canFreeze}
           onClick={g.useFreeze}
         />
-        <NextPowerMeter combo={g.combo} every={POWERUP_EVERY} />
-        <ShieldStatus active={g.shieldActive} />
+        <span className="ml-auto" />
+        <NextPowerChip combo={g.combo} every={POWERUP_EVERY} />
+        <ShieldChip active={g.shieldActive} />
       </div>
 
       {/* question */}
@@ -419,7 +454,15 @@ export default function BattleScreen({ g }) {
           disabled={!g.locked}
           className={`${BTN_PRIMARY} ${g.locked ? 'animate-glow' : ''}`}
         >
-          {lastLevel ? 'Finish Game' : 'Next Level'}
+          {lastLevel ? (
+            <>
+              <Icon name="trophy" className="h-5 w-5" /> Finish Game
+            </>
+          ) : (
+            <>
+              <Icon name="sword" className="h-5 w-5" /> Next Level
+            </>
+          )}
         </button>
       </div>
     </section>

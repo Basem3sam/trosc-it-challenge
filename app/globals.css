@@ -50,7 +50,10 @@
   --animate-intro: introIn 0.9s cubic-bezier(0.2, 1.4, 0.4, 1) both;
   --animate-flash: flashOut 0.22s ease-out both;
   --animate-frost: frostPulse 1.6s ease-in-out infinite;
-  --animate-shieldpulse: shieldPulse 1.5s ease-in-out infinite;
+  /* glows hug the icon's shape (drop-shadow) — never a box around text */
+  --animate-icon-glow: iconGlow 1.5s ease-in-out infinite;
+  /* available power-ups breathe via border/bg color — no floating box glow */
+  --animate-usable: usablePulse 1.4s ease-in-out infinite;
 }
 
 /* Keyframes */
@@ -305,14 +308,31 @@
     opacity: 0.6;
   }
 }
-@keyframes shieldPulse {
-  50% {
-    box-shadow: 0 0 14px rgba(255, 197, 61, 0.8);
-  }
-}
 @keyframes gradSlide {
   to {
     background-position: 200% center;
+  }
+}
+@keyframes iconGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 1px rgba(255, 197, 61, 0.35));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 7px rgba(255, 197, 61, 0.95));
+    transform: scale(1.15);
+  }
+}
+@keyframes usablePulse {
+  0%,
+  100% {
+    border-color: rgba(255, 197, 61, 0.3);
+    background-color: rgba(255, 197, 61, 0.08);
+  }
+  50% {
+    border-color: rgba(255, 197, 61, 0.85);
+    background-color: rgba(255, 197, 61, 0.16);
   }
 }
 
@@ -395,9 +415,6 @@ body::before {
 
 /* --------------------------------------------------------------------------
    Rising fire embers — square sparks, drift + tumble, smooth fade in/out.
-   Each particle is configured with CSS vars set from JS:
-   --c color · --glow glow color · --sz size · --dx horizontal drift
-   --rot tumble · --op peak opacity
    -------------------------------------------------------------------------- */
 .particle {
   position: absolute;
@@ -450,6 +467,47 @@ body::before {
       transparent 60%,
       rgba(0, 0, 0, 0.28) 100%
     );
+}
+
+/* --------------------------------------------------------------------------
+   Monster battle stage — spotlight glow behind, ground shadow below.
+   ::before paints before the svg (tree order), so the sprite sits on top.
+   -------------------------------------------------------------------------- */
+.monster {
+  position: relative;
+}
+.monster::before {
+  content: '';
+  position: absolute;
+  inset: -10px -16px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 60%,
+    rgba(255, 70, 85, 0.14),
+    transparent 65%
+  );
+  pointer-events: none;
+}
+.monster.boss::before {
+  inset: -18px -26px;
+  background: radial-gradient(
+    circle at 50% 60%,
+    rgba(255, 197, 61, 0.17),
+    rgba(255, 70, 85, 0.13) 42%,
+    transparent 72%
+  );
+}
+.monster::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 72%;
+  height: 9px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.5), transparent 72%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 /* Monster sprite states — order matters: later rules win */

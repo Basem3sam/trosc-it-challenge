@@ -51,7 +51,7 @@ function TimerRow({ remaining, total, warn, danger, frozen, frozenLeft }) {
         />
       </div>
       <span
-        className={`w-[5rem] text-right font-mono text-sm font-bold ${color}`}
+        className={`w-[5rem] text-right font-mono text-[0.9rem] font-bold ${color}`}
       >
         {frozen ? `FROZEN ${Math.ceil(frozenLeft)}s` : `${secs}s`}
       </span>
@@ -59,22 +59,76 @@ function TimerRow({ remaining, total, warn, danger, frozen, frozenLeft }) {
   );
 }
 
-function PowerButton({ icon, label, count, disabled, onClick }) {
+/* A real button: 3D press like the primary CTA, hint line, pulse when usable */
+function PowerButton({ icon, label, hint, count, usable, disabled, onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="relative flex items-center gap-1.5 rounded-xl border-[1.5px] border-gold/40 bg-gold/10 px-3 py-2 text-gold transition active:scale-95 disabled:pointer-events-none disabled:opacity-40"
+      aria-label={`${label} power-up — ${hint}`}
+      className={`relative flex min-h-[46px] items-center gap-2.5 rounded-xl border-[1.5px] px-3.5 py-2 text-left transition
+        ${
+          disabled
+            ? 'cursor-default border-edge bg-panel2 text-dust opacity-50'
+            : 'border-gold/50 bg-gold/12 text-gold shadow-[0_3px_0_#8A6A1E] hover:-translate-y-0.5 active:translate-y-[2px] active:shadow-[0_1px_0_#8A6A1E]'
+        }
+        ${usable ? 'animate-shieldpulse' : ''}`}
     >
-      <Icon name={icon} className="h-4 w-4" />
-      <span className="font-mono text-[0.62rem] font-bold tracking-[0.1em]">
-        {label}
+      <Icon name={icon} className="h-5 w-5 shrink-0" />
+      <span className="flex flex-col leading-tight">
+        <span className="font-mono text-[0.7rem] font-bold tracking-[0.1em]">
+          {label}
+        </span>
+        <span
+          className={`text-[0.6rem] ${disabled ? 'text-dust' : 'text-gold/70'}`}
+        >
+          {hint}
+        </span>
       </span>
       <span className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-gold font-mono text-[0.6rem] font-bold text-[#2B070C]">
         {count}
       </span>
     </button>
+  );
+}
+
+/* Status as HUD text — borderless, clearly NOT tappable */
+function NextPowerMeter({ combo, every }) {
+  const filled = combo % every;
+  const dots = '●'.repeat(filled) + '○'.repeat(every - filled);
+  const hot = filled === every - 1;
+  return (
+    <span
+      title={`Every ${every} correct answers in a row earn a power-up`}
+      aria-label={`Streak ${filled} of ${every} toward the next power-up`}
+      className={`ml-auto inline-flex items-center gap-1.5 font-mono text-[0.72rem] font-bold tracking-[0.12em] ${hot ? 'animate-shieldpulse text-gold' : 'text-dust'}`}
+    >
+      <Icon name="bolt" className="h-4 w-4" />
+      <span className="opacity-80">NEXT</span>
+      <span aria-hidden="true">{dots}</span>
+    </span>
+  );
+}
+
+function ShieldStatus({ active }) {
+  if (active) {
+    return (
+      <span
+        className="inline-flex items-center gap-1.5 font-mono text-[0.72rem] font-bold tracking-[0.12em] text-gold animate-shieldpulse"
+        title="Shield active — your next mistake is free"
+      >
+        <Icon name="shield" className="h-4 w-4" /> SHIELD ON
+      </span>
+    );
+  }
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 font-mono text-[0.72rem] tracking-[0.12em] text-dust opacity-70"
+      title="No shield — earn one with a 3-answer streak"
+    >
+      <Icon name="shield" className="h-4 w-4" /> SHIELD —
+    </span>
   );
 }
 
@@ -142,12 +196,6 @@ export default function BattleScreen({ g }) {
   const enemyDown = g.monsterPhase === 'hit' || g.monsterPhase === 'dead';
   const lastLevel = g.index === g.total - 1;
 
-  /* streak progress toward the next power-up (grants on every POWERUP_EVERY-th
-     correct in a row): filled dots = combo % EVERY; pulses when 1 away */
-  const pwrFilled = g.combo % POWERUP_EVERY;
-  const pwrDots = '●'.repeat(pwrFilled) + '○'.repeat(POWERUP_EVERY - pwrFilled);
-  const pwrHot = pwrFilled === POWERUP_EVERY - 1;
-
   return (
     <section
       aria-labelledby="question-text"
@@ -155,7 +203,7 @@ export default function BattleScreen({ g }) {
     >
       {/* HUD */}
       <header className="mb-3">
-        <div className="mb-2 flex items-center justify-between gap-2 font-mono text-[0.78rem] tracking-[0.1em] text-dust">
+        <div className="mb-2 flex items-center justify-between gap-2 font-mono text-[0.85rem] tracking-[0.1em] text-dust">
           <span key={`lvl-${g.index}`} className="animate-stamp">
             LEVEL {String(g.index + 1).padStart(2, '0')}/
             {String(g.total).padStart(2, '0')}
@@ -230,10 +278,10 @@ export default function BattleScreen({ g }) {
           <Hearts hearts={g.hearts} brokeAt={g.brokeAt} max={HEARTS_MAX} />
           {g.shieldActive && (
             <span
-              className="animate-shieldpulse ml-1 grid h-5 w-5 place-items-center rounded-full bg-gold/15 text-gold"
+              className="animate-shieldpulse ml-1 inline-flex items-center gap-1 font-mono text-[0.6rem] font-bold tracking-[0.1em] text-gold"
               title="Shield active — next mistake is free"
             >
-              <Icon name="shield" className="h-3.5 w-3.5" />
+              <Icon name="shield" className="h-3.5 w-3.5" /> ON
             </span>
           )}
         </div>
@@ -276,43 +324,28 @@ export default function BattleScreen({ g }) {
         </p>
       )}
 
-      {/* power-ups + streak meter */}
+      {/* power-ups (real buttons) + streak & shield (HUD status, not tappable) */}
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <PowerButton
           icon="cut"
           label="50/50"
+          hint="cuts 2 wrong"
           count={g.powerups.cut}
+          usable={g.canCut}
           disabled={!g.canCut}
           onClick={g.useCut}
         />
         <PowerButton
           icon="snow"
           label="FREEZE"
+          hint="stops the clock"
           count={g.powerups.freeze}
+          usable={g.canFreeze}
           disabled={!g.canFreeze}
           onClick={g.useFreeze}
         />
-
-        {/* next power-up meter — every POWERUP_EVERY correct in a row grants one */}
-        <span
-          title={`Every ${POWERUP_EVERY} correct answers in a row earn a power-up`}
-          className={`ml-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[0.62rem] tracking-[0.14em] ${pwrHot ? 'animate-shieldpulse border-gold/50 bg-gold/10 text-gold' : 'border-edge bg-panel text-dust'}`}
-        >
-          <Icon name="bolt" className="h-3.5 w-3.5" />
-          <span aria-hidden="true">{pwrDots}</span>
-        </span>
-
-        <span
-          title={
-            g.shieldActive
-              ? 'Shield active — your next mistake is free'
-              : 'No shield — earn one with a 3-streak'
-          }
-          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[0.62rem] tracking-[0.14em] ${g.shieldActive ? 'animate-shieldpulse border-gold/50 bg-gold/10 text-gold' : 'border-edge bg-panel text-dust opacity-60'}`}
-        >
-          <Icon name="shield" className="h-3.5 w-3.5" />
-          {g.shieldActive ? 'SHIELD ON' : 'SHIELD'}
-        </span>
+        <NextPowerMeter combo={g.combo} every={POWERUP_EVERY} />
+        <ShieldStatus active={g.shieldActive} />
       </div>
 
       {/* question */}
@@ -359,18 +392,18 @@ export default function BattleScreen({ g }) {
               />
             </span>
             <div>
-              <strong className="block text-[1.05rem]">
+              <strong className="block text-[1.1rem]">
                 {g.feedback.heading}
               </strong>
               {g.feedback.flavor && (
                 <span
-                  className={`mt-0.5 block text-[0.92rem] font-semibold ${g.feedback.ok ? 'text-gold' : 'text-frost'}`}
+                  className={`mt-0.5 block text-[0.98rem] font-semibold ${g.feedback.ok ? 'text-gold' : 'text-frost'}`}
                 >
                   {g.feedback.flavor}
                 </span>
               )}
               {g.feedback.explain && (
-                <span className="mt-0.5 block text-[0.95rem] text-dust">
+                <span className="mt-0.5 block text-[1rem] text-dust">
                   {g.feedback.explain}
                 </span>
               )}
@@ -379,12 +412,12 @@ export default function BattleScreen({ g }) {
         </div>
       )}
 
-      {/* sticky thumb-zone CTA */}
+      {/* sticky thumb-zone CTA — glows the moment it unlocks */}
       <div className="dock-fade sticky bottom-0 z-10 mt-2 pb-[calc(0.9rem+env(safe-area-inset-bottom))] pt-3 md:static md:pb-3">
         <button
           onClick={g.handleNext}
           disabled={!g.locked}
-          className={BTN_PRIMARY}
+          className={`${BTN_PRIMARY} ${g.locked ? 'animate-glow' : ''}`}
         >
           {lastLevel ? 'Finish Game' : 'Next Level'}
         </button>

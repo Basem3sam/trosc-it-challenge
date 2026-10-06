@@ -9,6 +9,10 @@ import {
   startMusic,
   stopMusic,
   setMusicDanger,
+  setMusicBoss,
+  spawnSting,
+  startHeartbeat,
+  stopHeartbeat,
 } from '@/lib/sounds';
 import { celebrate, sadRain } from '@/lib/fx';
 import {
@@ -59,17 +63,17 @@ export default function useGame() {
   const [best, setBest] = useState(null);
 
   /* ---------- power-ups ---------- */
-  const [powerups, setPowerups] = useState({ cut: 1, freeze: 1 }); // start with one of each to teach
+  const [powerups, setPowerups] = useState({ cut: 1, freeze: 1 });
   const [shieldActive, setShieldActive] = useState(false);
-  const [eliminated, setEliminated] = useState([]); // indices removed by 50/50
+  const [eliminated, setEliminated] = useState([]);
   const [frozen, setFrozen] = useState(false);
   const [frozenLeft, setFrozenLeft] = useState(0);
 
   /* ---------- battle visuals ---------- */
   const [remaining, setRemaining] = useState(QUESTION_TIME);
   const [countdownStep, setCountdownStep] = useState(null);
-  const [intro, setIntro] = useState(null); // { id } — "MONSTER APPEARS!" card
-  const [flash, setFlash] = useState(0); // hit-flash id (0 = off)
+  const [intro, setIntro] = useState(null);
+  const [flash, setFlash] = useState(0);
   const [monsterPhase, setMonsterPhase] = useState('idle');
   const [statusStamp, setStatusStamp] = useState(null);
   const [arenaShake, setArenaShake] = useState(false);
@@ -324,6 +328,20 @@ export default function useGame() {
     [later],
   );
 
+  /* ---------- level intro: "MONSTER APPEARS!" + that monster's spawn sting ---------- */
+  const showIntro = useCallback(
+    (monster) => {
+      introRef.current = true;
+      setIntro({ id: ++fxId.current });
+      spawnSting(monster);
+      later(() => {
+        introRef.current = false;
+        setIntro(null);
+      }, 1400);
+    },
+    [later],
+  );
+
   const startGame = useCallback(
     (nm) => {
       clearLater();
@@ -376,9 +394,10 @@ export default function useGame() {
         shield: false,
       });
       setScreen('battle');
-      runCountdown(() => {});
+      // level 1: FIGHT! → first monster's intro card (index 0 → ENEMIES[0])
+      runCountdown(() => showIntro(ENEMIES[0]));
     },
-    [clearLater, runCountdown],
+    [clearLater, runCountdown, showIntro],
   );
 
   const retry = useCallback(() => {
@@ -684,16 +703,13 @@ export default function useGame() {
     setStatusStamp(null);
     setEliminated([]);
     setBrokeAt(-1);
-    // "MONSTER APPEARS!" card on every level after the first (the countdown covers level 1)
+    // every level after the first gets its own intro card + spawn sting
     if (next > 0) {
-      introRef.current = true;
-      setIntro({ id: ++fxId.current });
-      later(() => {
-        introRef.current = false;
-        setIntro(null);
-      }, 1100);
+      const nextMonster =
+        next === TOTAL - 1 ? BOSS : ENEMIES[next % ENEMIES.length];
+      showIntro(nextMonster);
     }
-  }, [index, winGame, later]);
+  }, [index, winGame, showIntro]);
 
   const toggleMute = useCallback(() => {
     const next = !muted;
@@ -867,7 +883,7 @@ export default function useGame() {
       setScreen('result');
     } else {
       setIndex(ans.length);
-      setScreen('battle'); // no countdown on resume — get back in fast
+      setScreen('battle');
       toast(`Welcome back, ${nm} — resuming at level ${ans.length + 1}`);
     }
   }, [toast]);
@@ -880,10 +896,18 @@ export default function useGame() {
   const danger = answering && remaining <= DANGER_AT && remaining > 0;
   const mood = danger ? 'furious' : warn ? 'angry' : '';
 
-  /* switch the battle loop to the tense pattern during DANGER */
+  /* switch the battle loop: boss pattern on the final level, tense pattern in DANGER */
   useEffect(() => {
     setMusicDanger(danger);
-  }, [danger]);
+    setMusicBoss(index === TOTAL - 1);
+  }, [danger, index]);
+
+  /* low-HP heartbeat — only while fighting on your last heart */
+  useEffect(() => {
+    if (screen === 'battle' && hearts === 1 && !muted) startHeartbeat();
+    else stopHeartbeat();
+    return () => stopHeartbeat();
+  }, [screen, hearts, muted]);
 
   return {
     // state

@@ -328,16 +328,22 @@ export default function useGame() {
     [later],
   );
 
-  /* ---------- level intro: "MONSTER APPEARS!" + that monster's spawn sting ---------- */
+  /* ---------- level intro: "MONSTER APPEARS!" + that monster's spawn sting ----------
+     The dismiss is scheduled BEFORE the sting runs, and the sting is non-fatal —
+     a sound error can never block gameplay or leave the card stuck on screen. */
   const showIntro = useCallback(
     (monster) => {
       introRef.current = true;
       setIntro({ id: ++fxId.current });
-      spawnSting(monster);
       later(() => {
         introRef.current = false;
         setIntro(null);
       }, 1400);
+      try {
+        spawnSting(monster);
+      } catch (e) {
+        console.warn('spawn sting failed:', e);
+      }
     },
     [later],
   );
@@ -898,15 +904,32 @@ export default function useGame() {
 
   /* switch the battle loop: boss pattern on the final level, tense pattern in DANGER */
   useEffect(() => {
-    setMusicDanger(danger);
-    setMusicBoss(index === TOTAL - 1);
+    try {
+      setMusicDanger(danger);
+      setMusicBoss(index === TOTAL - 1);
+    } catch (e) {
+      console.warn('music mode failed:', e);
+    }
   }, [danger, index]);
 
   /* low-HP heartbeat — only while fighting on your last heart */
   useEffect(() => {
-    if (screen === 'battle' && hearts === 1 && !muted) startHeartbeat();
-    else stopHeartbeat();
-    return () => stopHeartbeat();
+    if (screen === 'battle' && hearts === 1 && !muted) {
+      try {
+        startHeartbeat();
+      } catch (e) {
+        console.warn('heartbeat failed:', e);
+      }
+    } else {
+      try {
+        stopHeartbeat();
+      } catch (_) {}
+    }
+    return () => {
+      try {
+        stopHeartbeat();
+      } catch (_) {}
+    };
   }, [screen, hearts, muted]);
 
   return {

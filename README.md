@@ -9,7 +9,7 @@ Freshmen scan a QR code, enter their name, and battle through <strong>10 IT-them
 </p>
 
 <p align="center">
-<strong>Think. Choose. Slay. ⚡</strong>
+<strong>⚡ Think. Choose. Slay. ⚡</strong>
 </p>
 
 <p align="center">

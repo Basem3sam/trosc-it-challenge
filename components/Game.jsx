@@ -27,13 +27,12 @@ export default function Game() {
     return () => document.removeEventListener('pointerdown', unlock);
   }, []);
 
-  // reset scroll BEFORE the new screen paints — never land mid-page
+  // reset scroll BEFORE the new screen paints
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
   }, [g.screen]);
 
-  // rising fire embers — generated after mount to avoid hydration mismatch;
-  // negative delays mean the field is already populated on first paint
+  // rising fire embers — after mount to avoid hydration mismatch
   const [particles, setParticles] = useState([]);
   useEffect(() => {
     setParticles(
@@ -56,45 +55,55 @@ export default function Game() {
     );
   }, []);
 
+  const isBattle = g.screen === 'battle';
+
   return (
-    <div className="flex min-h-dvh flex-col">
-      <div className="mx-auto flex w-full max-w-[600px] flex-1 flex-col px-[clamp(18px,4.5vw,44px)] pt-[calc(clamp(18px,4.5vw,44px)+56px)]">
-        {/* WELCOME — full-height clipped shell: fills the viewport, animation
-            can never poke past the edges, footer stays out of sight */}
-        {g.screen === 'welcome' && (
-          <div className="flex flex-1 flex-col justify-center overflow-hidden pb-6">
-            <WelcomeScreen best={g.best} onStart={g.startGame} />
+    /* battle locks to exactly one viewport (page never scrolls — the question
+       area scrolls internally instead); welcome/result flow naturally */
+    <div
+      className={
+        isBattle
+          ? 'flex h-dvh flex-col overflow-hidden'
+          : 'flex min-h-dvh flex-col'
+      }
+    >
+      <div
+        className={`mx-auto flex w-full max-w-[600px] flex-1 flex-col px-[clamp(18px,4.5vw,44px)] ${
+          isBattle
+            ? 'min-h-0 pt-[calc(8px+env(safe-area-inset-top))]'
+            : 'pt-[calc(clamp(18px,4.5vw,44px)+56px)]'
+        }`}
+      >
+        {/* WELCOME / RESULT — my-auto: centered when it fits, scrolls from the
+            top when it can't. No clipping → no container ever gets sliced. */}
+        {!isBattle && (
+          <div className="my-auto w-full py-4">
+            {g.screen === 'welcome' && (
+              <WelcomeScreen best={g.best} onStart={g.startGame} />
+            )}
+            {g.screen === 'result' && <ResultScreen g={g} />}
           </div>
         )}
 
-        {/* BATTLE — taller than the viewport; needs real scrolling,
-            so no vertical clip here (it would break the sticky dock) */}
-        {g.screen === 'battle' && (
-          <div className="flex flex-1 flex-col pb-[clamp(14px,3.5vw,32px)]">
-            <BattleScreen g={g} />
-          </div>
-        )}
-
-        {/* RESULT — same clipped full-height shell as welcome */}
-        {g.screen === 'result' && (
-          <div className="flex flex-1 flex-col justify-center overflow-hidden pb-6">
-            <ResultScreen g={g} />
-          </div>
-        )}
+        {/* BATTLE — fixed-height app layout; all chrome visible, inner scroll */}
+        {isBattle && <BattleScreen g={g} />}
       </div>
 
-      <footer className="pb-[calc(0.9rem+env(safe-area-inset-bottom))] pt-4 text-center font-mono text-[0.64rem] tracking-[0.2em] text-dust">
-        TROSC · IT TEAM —{' '}
-        <a
-          href={SITE_URL}
-          target="_blank"
-          rel="noopener"
-          className="border-b border-dotted border-blood text-blood no-underline"
-        >
-          trosc.vercel.app
-        </a>{' '}
-        · ARCADE v2
-      </footer>
+      {/* footer on welcome/result only — on battle it would peek above the fold */}
+      {!isBattle && (
+        <footer className="pb-[calc(0.9rem+env(safe-area-inset-bottom))] pt-4 text-center font-mono text-[0.64rem] tracking-[0.2em] text-dust">
+          TROSC · IT TEAM —{' '}
+          <a
+            href={SITE_URL}
+            target="_blank"
+            rel="noopener"
+            className="border-b border-dotted border-blood text-blood no-underline"
+          >
+            trosc.vercel.app
+          </a>{' '}
+          · ARCADE v2
+        </footer>
+      )}
 
       {/* rising fire embers */}
       <div
@@ -121,7 +130,7 @@ export default function Game() {
       </div>
 
       {/* combo fire — gold screen edges at streak ×3+ */}
-      {g.screen === 'battle' && g.combo >= 3 && (
+      {isBattle && g.combo >= 3 && (
         <div
           aria-hidden="true"
           className="pointer-events-none fixed inset-0 z-[64] animate-fire [box-shadow:inset_0_0_110px_rgba(255,197,61,.22)]"
@@ -176,7 +185,7 @@ export default function Game() {
         </div>
       )}
 
-      {/* "MONSTER APPEARS!" level intro — top-level so it always covers the full page */}
+      {/* "MONSTER APPEARS!" level intro */}
       {g.intro && (
         <div
           className="fixed inset-0 z-[85] grid place-items-center bg-[rgba(10,4,7,.92)]"
@@ -231,10 +240,10 @@ export default function Game() {
         </span>
       ))}
 
-      {/* CRT arcade overlay — scanlines + vignette, above everything visual */}
+      {/* CRT arcade overlay */}
       <div aria-hidden="true" className="crt-layer" />
 
-      {/* sound toggle — always reachable */}
+      {/* sound toggle */}
       <button
         type="button"
         onClick={g.toggleMute}

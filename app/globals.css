@@ -627,6 +627,14 @@ body::before {
   filter: drop-shadow(0 0 14px rgba(255, 70, 85, 0.55));
 }
 
+/* retro collapsible — hide the default triangle */
+summary::-webkit-details-marker {
+  display: none;
+}
+summary {
+  list-style: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

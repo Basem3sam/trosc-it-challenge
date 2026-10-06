@@ -29,7 +29,7 @@ function ScoreRing({ pct, reduced }) {
     <div
       role="img"
       aria-label={`Accuracy ${Math.round(val)} percent`}
-      className="relative mx-auto mb-4 w-[clamp(180px,58vw,230px)]"
+      className="relative mx-auto mb-2 w-[clamp(150px,46vw,190px)]"
     >
       <svg
         viewBox="0 0 120 120"
@@ -57,10 +57,10 @@ function ScoreRing({ pct, reduced }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-[clamp(2.2rem,9vw,2.9rem)] font-bold tracking-tight">
+        <span className="text-[clamp(1.9rem,8vw,2.5rem)] font-bold tracking-tight">
           {Math.round(val)}%
         </span>
-        <span className="font-mono text-[0.7rem] tracking-[0.25em] text-dust">
+        <span className="font-mono text-[0.64rem] tracking-[0.25em] text-dust">
           ACCURACY
         </span>
       </div>
@@ -70,11 +70,11 @@ function ScoreRing({ pct, reduced }) {
 
 function Stat({ label, value }) {
   return (
-    <div className="rounded-xl border border-edge bg-panel px-2 py-3">
-      <p className="font-mono text-[0.62rem] tracking-[0.14em] text-dust">
+    <div className="rounded-xl border border-edge bg-panel px-2 py-2">
+      <p className="font-mono text-[0.58rem] tracking-[0.14em] text-dust">
         {label}
       </p>
-      <p className="mt-0.5 font-display text-xl text-cream">{value}</p>
+      <p className="mt-0.5 font-display text-lg text-cream">{value}</p>
     </div>
   );
 }
@@ -85,13 +85,10 @@ export default function ResultScreen({ g }) {
   const tier = won ? tierFor(g.score) : null;
 
   return (
-    <section
-      aria-labelledby="result-kicker"
-      className="m-auto w-full animate-screen-in text-center"
-    >
+    <section aria-labelledby="result-kicker" className="w-full text-center">
       <h1
         id="result-kicker"
-        className={`mb-2 font-display text-[clamp(1.5rem,6.5vw,2.2rem)] tracking-[0.06em] ${
+        className={`mb-1.5 font-display text-[clamp(1.4rem,6vw,2rem)] tracking-[0.06em] ${
           won
             ? 'text-gold [text-shadow:0_0_28px_rgba(255,197,61,.45)]'
             : 'animate-blink text-blood [text-shadow:0_0_28px_rgba(255,70,85,.5)]'
@@ -99,13 +96,13 @@ export default function ResultScreen({ g }) {
       >
         {won ? 'GAME COMPLETE!' : 'GAME OVER'}
       </h1>
-      <h2 className="mb-4 text-[clamp(2rem,9vw,2.8rem)] font-bold tracking-tight">
+      <h2 className="mb-3 text-[clamp(1.8rem,8vw,2.5rem)] font-bold tracking-tight">
         {g.name}
       </h2>
 
       {!won && (
-        <p className="-mt-1 mb-5 flex items-center justify-center gap-2 text-[1.08rem] font-semibold text-blood">
-          <Icon name="skull" className="h-6 w-6" />
+        <p className="mb-3 flex items-center justify-center gap-2 text-[1.02rem] font-semibold text-blood">
+          <Icon name="skull" className="h-5 w-5" />
           <span>
             Defeated by <b>{by}</b> at Level {attempted}!
           </span>
@@ -113,15 +110,13 @@ export default function ResultScreen({ g }) {
       )}
 
       <ScoreRing pct={pct} reduced={g.reduced} />
-      <p className="text-[1.08rem] tracking-[0.1em] text-dust">
-        {g.score} / {attempted} CORRECT
-      </p>
-      <p className="mb-5 mt-1 font-mono text-[1.15rem] font-bold tracking-[0.1em] text-gold">
-        {g.xp} XP EARNED
+      <p className="font-mono text-[0.95rem] tracking-[0.1em] text-dust">
+        {g.score} / {attempted} CORRECT ·{' '}
+        <span className="font-bold text-gold">{g.xp} XP</span>
       </p>
 
       {stats && (
-        <div className="mx-auto mb-5 grid w-full max-w-[300px] grid-cols-3 gap-2">
+        <div className="mx-auto mt-3 grid w-full max-w-[300px] grid-cols-3 gap-2">
           <Stat label="MAX COMBO" value={`×${stats.longestCombo}`} />
           <Stat
             label="FASTEST"
@@ -137,26 +132,26 @@ export default function ResultScreen({ g }) {
       )}
 
       {won && g.result.record && (
-        <p className="animate-stamp mx-auto mb-3 w-fit rounded-full bg-blood px-4 py-2 font-mono text-[0.78rem] font-bold tracking-[0.16em] text-bloodink">
+        <p className="animate-stamp mx-auto mt-3 w-fit rounded-full bg-blood px-4 py-1.5 font-mono text-[0.74rem] font-bold tracking-[0.16em] text-bloodink">
           NEW PERSONAL BEST!
         </p>
       )}
 
       {badges && badges.length > 0 && (
-        <div className="mb-4 flex flex-wrap justify-center gap-2">
+        <div className="mt-3 flex flex-wrap justify-center gap-2">
           {badges.map((b) => (
             <span
               key={b.label}
-              className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1.5 font-mono text-[0.72rem] tracking-[0.12em] text-gold"
+              className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 font-mono text-[0.7rem] tracking-[0.12em] text-gold"
             >
-              <Icon name={b.icon} className="h-4 w-4" /> {b.label}
+              <Icon name={b.icon} className="h-3.5 w-3.5" /> {b.label}
             </span>
           ))}
         </div>
       )}
 
       <p
-        className={`mx-auto mb-5 flex w-fit items-center gap-2.5 rounded-full border px-5 py-2.5 font-mono text-[0.88rem] tracking-[0.14em] ${won ? 'animate-rank-in border-gold/45 bg-gold/10 text-gold' : 'border-blood/45 bg-blood/10 text-blood'}`}
+        className={`mx-auto mt-3 flex w-fit items-center gap-2.5 rounded-full border px-4 py-2 font-mono text-[0.84rem] tracking-[0.14em] ${won ? 'animate-rank-in border-gold/45 bg-gold/10 text-gold' : 'border-blood/45 bg-blood/10 text-blood'}`}
       >
         {won ? (
           <>
@@ -177,7 +172,7 @@ export default function ResultScreen({ g }) {
         )}
       </p>
 
-      <p className="mx-auto mb-6 flex w-fit items-center gap-2.5 rounded-[18px] border border-edge bg-panel px-5 py-3.5 text-left text-[1.15rem] font-semibold">
+      <p className="mx-auto mt-3 flex w-fit items-center gap-2.5 rounded-[18px] border border-edge bg-panel px-4 py-2.5 text-left text-[1.05rem] font-semibold">
         <Icon name={won ? tier.icon : 'skull'} className="h-5 w-5 text-blood" />
         <span>
           {won
@@ -186,11 +181,7 @@ export default function ResultScreen({ g }) {
         </span>
       </p>
 
-      {/* per-level recap — dots pop in one by one */}
-      <div className="mb-6">
-        <p className="mb-2.5 font-mono text-[0.72rem] tracking-[0.22em] text-dust">
-          YOUR RUN
-        </p>
+      <div className="mt-4">
         <div className="flex flex-wrap justify-center gap-2">
           {g.answers.map((ans, i) => {
             const ok = g.run[i] && ans === g.run[i].correctAnswer;
@@ -199,25 +190,25 @@ export default function ResultScreen({ g }) {
                 key={i}
                 title={`Level ${i + 1}: ${ok ? 'monster defeated' : 'you were hit'}`}
                 style={{ animationDelay: `${i * 55}ms` }}
-                className={`animate-dot-pop h-4 w-4 rounded-full ${ok ? 'bg-blood' : 'bg-frost'}`}
+                className={`animate-dot-pop h-3.5 w-3.5 rounded-full ${ok ? 'bg-blood' : 'bg-frost'}`}
               />
             );
           })}
         </div>
-        <p className="mt-3 flex items-center justify-center gap-1.5 font-mono text-[0.75rem] tracking-[0.1em] text-dust">
+        <p className="mt-2 flex items-center justify-center gap-1.5 font-mono text-[0.72rem] tracking-[0.1em] text-dust">
           <Icon name="bolt" className="h-4 w-4 text-gold" /> Screenshot your
           rank and challenge your friends!
         </p>
       </div>
 
-      <button onClick={g.retry} className={BTN_PRIMARY}>
+      <button onClick={g.retry} className={`${BTN_PRIMARY} mt-4`}>
         Play Again <Icon name="retry" className="h-5 w-5" />
       </button>
       <a
         href={JOIN_FORM_URL}
         target="_blank"
         rel="noopener"
-        className={`${BTN_GHOST} mt-3`}
+        className={`${BTN_GHOST} mt-2.5`}
       >
         Join TROSC Community <Icon name="external" className="h-5 w-5" />
       </a>

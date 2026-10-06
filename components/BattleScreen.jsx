@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { Icon, HeartIcon } from '@/lib/icons';
 import { monsterSVG } from '@/lib/monsters';
 import { BTN_PRIMARY } from '@/lib/ui';
@@ -11,7 +12,7 @@ import {
   POWERUP_EVERY,
 } from '@/lib/game';
 
-/* playful Kahoot-style key colors (staying on the TROSC palette) */
+/* playful Kahoot-style key colors (on the TROSC palette) */
 const KEY_TONES = [
   'bg-blood/15 text-blood border-blood/40',
   'bg-gold/15 text-gold border-gold/40',
@@ -51,7 +52,7 @@ function TimerRow({ remaining, total, warn, danger, frozen, frozenLeft }) {
         ? 'bg-warn'
         : 'bg-gold';
   return (
-    <div className="mb-2 flex items-center gap-2" aria-hidden="true">
+    <div className="mb-2 flex shrink-0 items-center gap-2" aria-hidden="true">
       <div className="h-2 flex-1 overflow-hidden rounded-full bg-panel2">
         <div
           className={`h-full rounded-full transition-[width] duration-100 ease-linear ${fill}`}
@@ -67,7 +68,7 @@ function TimerRow({ remaining, total, warn, danger, frozen, frozenLeft }) {
   );
 }
 
-/* Real button: 3D press + hint (mobile only) + breathing border when available */
+/* Real button: 3D press + breathing border when available */
 function PowerButton({ icon, label, hint, count, disabled, onClick }) {
   return (
     <button
@@ -75,7 +76,7 @@ function PowerButton({ icon, label, hint, count, disabled, onClick }) {
       onClick={onClick}
       disabled={disabled}
       aria-label={`${label} power-up — ${hint}`}
-      className={`relative flex min-h-[46px] items-center gap-2.5 rounded-xl border-[1.5px] px-3.5 py-2 text-left transition
+      className={`relative flex min-h-[44px] items-center gap-2.5 rounded-xl border-[1.5px] px-3.5 py-2 text-left transition
         ${
           disabled
             ? 'cursor-default border-edge bg-panel2 text-dust opacity-50'
@@ -194,7 +195,7 @@ function Option({ i, text, correct, chosen, locked, cut, onPick }) {
       onClick={onPick}
       disabled={locked || isCut}
       style={{ animationDelay: `${i * 60}ms` }}
-      className={`group flex min-h-[62px] w-full items-center gap-3.5 rounded-xl border-[1.5px] bg-panel2 px-4 py-3 text-left font-medium leading-snug text-cream transition active:scale-[.97] disabled:cursor-default md:min-h-[76px] animate-opt-in ${cls} ${locked && isChosen ? 'animate-stamp' : ''}`}
+      className={`group flex min-h-[60px] w-full items-center gap-3.5 rounded-xl border-[1.5px] bg-panel2 px-4 py-2.5 text-left font-medium leading-snug text-cream transition active:scale-[.97] disabled:cursor-default md:min-h-[72px] animate-opt-in ${cls} ${locked && isChosen ? 'animate-stamp' : ''}`}
     >
       <span
         className={`grid h-[34px] w-[34px] shrink-0 place-items-center rounded-lg border font-mono text-sm font-bold transition-transform group-hover:scale-110 ${keyCls}`}
@@ -227,14 +228,26 @@ export default function BattleScreen({ g }) {
   const enemyDown = g.monsterPhase === 'hit' || g.monsterPhase === 'dead';
   const lastLevel = g.index === g.total - 1;
 
+  /* the question/report area scrolls internally — never the page */
+  const scrollRef = useRef(null);
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [g.index]);
+  useEffect(() => {
+    if (g.locked) {
+      const el = scrollRef.current;
+      el?.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    }
+  }, [g.locked]);
+
   return (
     <section
       aria-labelledby="question-text"
-      className="m-auto w-full animate-screen-in-soft"
+      className="flex min-h-0 w-full flex-1 animate-screen-in-soft flex-col"
     >
       {/* HUD */}
-      <header className="mb-3">
-        <div className="mb-2 flex items-center justify-between gap-2 font-mono text-[0.85rem] tracking-[0.1em] text-dust">
+      <header className="mb-2 shrink-0">
+        <div className="mb-1.5 flex items-center justify-between gap-2 pr-12 font-mono text-[0.85rem] tracking-[0.1em] text-dust md:pr-0">
           <span key={`lvl-${g.index}`} className="animate-stamp">
             LEVEL {String(g.index + 1).padStart(2, '0')}/
             {String(g.total).padStart(2, '0')}
@@ -269,9 +282,9 @@ export default function BattleScreen({ g }) {
         </div>
       </header>
 
-      {/* THE ARENA — overflow-hidden clips the stage glow inside the card */}
+      {/* THE ARENA — glow clipped inside the card */}
       <div
-        className={`relative mb-2 overflow-hidden rounded-2xl border border-edge bg-panel px-4 pb-4 pt-3.5 ${g.arenaShake ? 'animate-shake' : ''}`}
+        className={`relative mb-2 shrink-0 overflow-hidden rounded-2xl border border-edge bg-panel px-4 pb-3.5 pt-3 ${g.arenaShake ? 'animate-shake' : ''}`}
       >
         <div className="flex items-center gap-3.5">
           <div
@@ -302,7 +315,7 @@ export default function BattleScreen({ g }) {
           </div>
         </div>
 
-        <div className="mt-3 flex items-center gap-2 border-t border-dashed border-edge pt-2.5">
+        <div className="mt-2.5 flex items-center gap-2 border-t border-dashed border-edge pt-2.5">
           <span className="font-mono text-[0.6rem] tracking-[0.2em] text-dust">
             YOUR HP
           </span>
@@ -344,7 +357,7 @@ export default function BattleScreen({ g }) {
       {g.warn && (
         <p
           role="alert"
-          className="animate-cry mb-2 text-center font-display text-[clamp(1rem,4.5vw,1.3rem)] text-warn"
+          className="animate-cry mb-1.5 shrink-0 text-center font-display text-[clamp(1rem,4.5vw,1.3rem)] text-warn"
         >
           HURRY UP! {WARN_AT} SECONDS LEFT!
         </p>
@@ -352,14 +365,14 @@ export default function BattleScreen({ g }) {
       {g.danger && (
         <p
           role="alert"
-          className="animate-cry-fast mb-2 text-center font-display text-[clamp(1rem,4.5vw,1.3rem)] text-blood"
+          className="animate-cry-fast mb-1.5 shrink-0 text-center font-display text-[clamp(1rem,4.5vw,1.3rem)] text-blood"
         >
           DANGER! {Math.ceil(g.remaining)} SECONDS!
         </p>
       )}
 
-      {/* buttons (3D, pressable) — stat chips stay on ONE line on desktop */}
-      <div className="mb-2 flex flex-wrap items-center gap-2 md:flex-nowrap">
+      {/* power buttons + stat chips */}
+      <div className="mb-2 flex shrink-0 flex-wrap items-center gap-2 md:flex-nowrap">
         <PowerButton
           icon="cut"
           label="50/50"
@@ -382,72 +395,73 @@ export default function BattleScreen({ g }) {
         </div>
       </div>
 
-      {/* question */}
-      <article
-        key={g.index}
-        className={`animate-card-in rounded-2xl border border-edge bg-panel p-[clamp(1.1rem,4vw,1.8rem)] ${g.cardShake ? 'animate-shake' : ''}`}
-      >
-        <h2
-          id="question-text"
-          className="mb-4 text-[clamp(1.25rem,5.2vw,1.65rem)] font-bold leading-snug tracking-tight"
+      {/* question + battle report — the ONLY scrolling region */}
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
+        <article
+          key={g.index}
+          className={`animate-card-in rounded-2xl border border-edge bg-panel p-[clamp(1rem,3.6vw,1.6rem)] ${g.cardShake ? 'animate-shake' : ''}`}
         >
-          {q.question}
-        </h2>
-        <div className="grid gap-2.5">
-          {q.options.map((opt, i) => (
-            <Option
-              key={i}
-              i={i}
-              text={opt}
-              correct={q.correctAnswer}
-              chosen={chosen}
-              locked={g.locked}
-              cut={g.eliminated}
-              onPick={() => g.chooseAnswer(i)}
-            />
-          ))}
-        </div>
-      </article>
-
-      {/* battle report */}
-      {g.feedback && (
-        <div
-          role="status"
-          aria-live="polite"
-          className={`animate-card-in mt-4 rounded-xl border p-4 ${g.feedback.ok ? 'border-blood/45 bg-blood/10' : 'border-frost/45 bg-frost/10'}`}
-        >
-          <div className="flex items-start gap-3">
-            <span
-              className={`mt-0.5 grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full ${g.feedback.ok ? 'bg-blood text-bloodink' : 'bg-frost text-frostink'}`}
-            >
-              <Icon
-                name={g.feedback.ok ? 'check' : 'cross'}
-                className="h-4 w-4"
+          <h2
+            id="question-text"
+            className="mb-3 text-[clamp(1.2rem,5vw,1.6rem)] font-bold leading-snug tracking-tight"
+          >
+            {q.question}
+          </h2>
+          <div className="grid gap-2">
+            {q.options.map((opt, i) => (
+              <Option
+                key={i}
+                i={i}
+                text={opt}
+                correct={q.correctAnswer}
+                chosen={chosen}
+                locked={g.locked}
+                cut={g.eliminated}
+                onPick={() => g.chooseAnswer(i)}
               />
-            </span>
-            <div>
-              <strong className="block text-[1.1rem]">
-                {g.feedback.heading}
-              </strong>
-              {g.feedback.flavor && (
-                <span
-                  className={`mt-0.5 block text-[0.98rem] font-semibold ${g.feedback.ok ? 'text-gold' : 'text-frost'}`}
-                >
-                  {g.feedback.flavor}
-                </span>
-              )}
-              {g.feedback.explain && (
-                <span className="mt-0.5 block text-[1rem] text-dust">
-                  {g.feedback.explain}
-                </span>
-              )}
+            ))}
+          </div>
+        </article>
+
+        {g.feedback && (
+          <div
+            role="status"
+            aria-live="polite"
+            className={`animate-card-in mb-2 mt-2.5 rounded-xl border p-3.5 ${g.feedback.ok ? 'border-blood/45 bg-blood/10' : 'border-frost/45 bg-frost/10'}`}
+          >
+            <div className="flex items-start gap-3">
+              <span
+                className={`mt-0.5 grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full ${g.feedback.ok ? 'bg-blood text-bloodink' : 'bg-frost text-frostink'}`}
+              >
+                <Icon
+                  name={g.feedback.ok ? 'check' : 'cross'}
+                  className="h-4 w-4"
+                />
+              </span>
+              <div>
+                <strong className="block text-[1.08rem]">
+                  {g.feedback.heading}
+                </strong>
+                {g.feedback.flavor && (
+                  <span
+                    className={`mt-0.5 block text-[0.96rem] font-semibold ${g.feedback.ok ? 'text-gold' : 'text-frost'}`}
+                  >
+                    {g.feedback.flavor}
+                  </span>
+                )}
+                {g.feedback.explain && (
+                  <span className="mt-0.5 block text-[0.98rem] text-dust">
+                    {g.feedback.explain}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* sticky thumb-zone CTA — glows the moment it unlocks */}
-      <div className="dock-fade sticky bottom-0 z-10 mt-2 pb-[calc(0.9rem+env(safe-area-inset-bottom))] pt-3 md:static md:pb-3">
+      {/* CTA — always visible, bottom of the fixed layout */}
+      <div className="shrink-0 pb-[calc(0.6rem+env(safe-area-inset-bottom))] pt-2">
         <button
           onClick={g.handleNext}
           disabled={!g.locked}

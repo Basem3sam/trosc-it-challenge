@@ -230,7 +230,7 @@ export default function BattleScreen({ g }) {
   return (
     <section
       aria-labelledby="question-text"
-      className="m-auto w-full animate-screen-in"
+      className="m-auto w-full animate-screen-in-soft"
     >
       {/* HUD */}
       <header className="mb-3">

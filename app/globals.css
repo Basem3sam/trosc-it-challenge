@@ -27,6 +27,8 @@
   --animate-stamp: stamp 0.35s ease;
   --animate-card-in: cardIn 0.3s ease both;
   --animate-screen-in: screenIn 0.4s ease both;
+  /* scale+fade entrance — never extends the page, so nothing can peek */
+  --animate-screen-in-soft: screenInSoft 0.35s ease both;
   --animate-blink: blink 1.1s steps(2, start) infinite;
   --animate-marquee: marquee 22s linear infinite;
   --animate-stripes: stripes 0.7s linear infinite;
@@ -106,6 +108,16 @@
   from {
     opacity: 0;
     transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes screenInSoft {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
   }
   to {
     opacity: 1;
@@ -375,6 +387,13 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* never allow horizontal overflow from animations or long content —
+   `clip` (not `hidden`) also removes programmatic sideways scrolling */
+html,
+body {
+  overflow-x: clip;
+}
+
 body {
   background: var(--color-night);
   color: var(--color-cream);
@@ -382,6 +401,24 @@ body {
   line-height: 1.5;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* slim, dark scrollbar on desktop — part of the theme instead of a grey bar */
+@media (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-night);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-edge);
+    border-radius: 999px;
+    border: 2px solid var(--color-night);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #5a3441;
+  }
 }
 
 ::selection {

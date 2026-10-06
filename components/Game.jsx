@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import useGame from './useGame';
 import WelcomeScreen from './WelcomeScreen';
 import BattleScreen from './BattleScreen';
@@ -27,6 +27,11 @@ export default function Game() {
     return () => document.removeEventListener('pointerdown', unlock);
   }, []);
 
+  // reset scroll BEFORE the new screen paints — never land mid-page
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [g.screen]);
+
   // rising fire embers — generated after mount to avoid hydration mismatch;
   // negative delays mean the field is already populated on first paint
   const [particles, setParticles] = useState([]);
@@ -40,28 +45,45 @@ export default function Game() {
           gl,
           left: Math.random() * 100,
           size: 3 + Math.random() * 4,
-          dx: Math.random() * 120 - 60, // horizontal drift, px
-          rot: Math.random() * 420 - 210, // tumble, deg
-          op: 0.25 + Math.random() * 0.35, // peak opacity
-          dur: 9 + Math.random() * 13, // seconds to cross the screen
-          delay: -Math.random() * 22, // negative = already mid-flight
-          blur: Math.random() > 0.7, // some sparks are soft = depth
+          dx: Math.random() * 120 - 60,
+          rot: Math.random() * 420 - 210,
+          op: 0.25 + Math.random() * 0.35,
+          dur: 9 + Math.random() * 13,
+          delay: -Math.random() * 22,
+          blur: Math.random() > 0.7,
         };
       }),
     );
   }, []);
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-[600px] flex-col px-[clamp(18px,4.5vw,44px)] pb-[clamp(14px,3.5vw,32px)] pt-[calc(clamp(18px,4.5vw,44px)+56px)]">
-      <div className="flex w-full flex-1 flex-col">
+    <div className="flex min-h-dvh flex-col">
+      <div className="mx-auto flex w-full max-w-[600px] flex-1 flex-col px-[clamp(18px,4.5vw,44px)] pt-[calc(clamp(18px,4.5vw,44px)+56px)]">
+        {/* WELCOME — full-height clipped shell: fills the viewport, animation
+            can never poke past the edges, footer stays out of sight */}
         {g.screen === 'welcome' && (
-          <WelcomeScreen best={g.best} onStart={g.startGame} />
+          <div className="flex flex-1 flex-col justify-center overflow-hidden pb-6">
+            <WelcomeScreen best={g.best} onStart={g.startGame} />
+          </div>
         )}
-        {g.screen === 'battle' && <BattleScreen g={g} />}
-        {g.screen === 'result' && <ResultScreen g={g} />}
+
+        {/* BATTLE — taller than the viewport; needs real scrolling,
+            so no vertical clip here (it would break the sticky dock) */}
+        {g.screen === 'battle' && (
+          <div className="flex flex-1 flex-col pb-[clamp(14px,3.5vw,32px)]">
+            <BattleScreen g={g} />
+          </div>
+        )}
+
+        {/* RESULT — same clipped full-height shell as welcome */}
+        {g.screen === 'result' && (
+          <div className="flex flex-1 flex-col justify-center overflow-hidden pb-6">
+            <ResultScreen g={g} />
+          </div>
+        )}
       </div>
 
-      <footer className="pb-2 pt-8 text-center font-mono text-[0.64rem] tracking-[0.2em] text-dust">
+      <footer className="pb-[calc(0.9rem+env(safe-area-inset-bottom))] pt-4 text-center font-mono text-[0.64rem] tracking-[0.2em] text-dust">
         TROSC · IT TEAM —{' '}
         <a
           href={SITE_URL}

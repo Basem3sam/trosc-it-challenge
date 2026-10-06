@@ -20,29 +20,62 @@ function Hearts({ hearts, brokeAt, max }) {
   );
 }
 
-function TimerRow({ remaining, total, warn, danger }) {
+function TimerRow({ remaining, total, warn, danger, frozen, frozenLeft }) {
   const secs = Math.ceil(remaining);
+  const color = frozen
+    ? 'text-[#7FD8FF]'
+    : danger
+      ? 'text-blood'
+      : warn
+        ? 'text-warn'
+        : 'text-gold';
+  const fill = frozen
+    ? 'bg-[#7FD8FF]'
+    : danger
+      ? 'animate-tpulse bg-blood'
+      : warn
+        ? 'bg-warn'
+        : 'bg-gold';
   return (
     <div className="mb-2 flex items-center gap-2" aria-hidden="true">
       <div className="h-2 flex-1 overflow-hidden rounded-full bg-panel2">
         <div
-          className={`h-full rounded-full transition-[width] duration-100 ease-linear ${danger ? 'animate-tpulse bg-blood' : warn ? 'bg-warn' : 'bg-gold'}`}
-          style={{ width: `${(remaining / total) * 100}%` }}
+          className={`h-full rounded-full transition-[width] duration-100 ease-linear ${fill}`}
+          style={{ width: frozen ? '100%' : `${(remaining / total) * 100}%` }}
         />
       </div>
       <span
-        key={danger ? secs : 's'}
-        className={`animate-stamp w-[3.6rem] text-right font-mono text-sm font-bold ${danger ? 'text-blood' : warn ? 'text-warn' : 'text-gold'}`}
+        className={`w-[5rem] text-right font-mono text-sm font-bold ${color}`}
       >
-        {secs}s
+        {frozen ? `FROZEN ${Math.ceil(frozenLeft)}s` : `${secs}s`}
       </span>
     </div>
   );
 }
 
-function Option({ i, text, correct, chosen, locked, onPick }) {
+function PowerButton({ icon, label, count, disabled, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="relative flex items-center gap-1.5 rounded-xl border-[1.5px] border-gold/40 bg-gold/10 px-3 py-2 text-gold transition active:scale-95 disabled:pointer-events-none disabled:opacity-40"
+    >
+      <Icon name={icon} className="h-4 w-4" />
+      <span className="font-mono text-[0.62rem] font-bold tracking-[0.1em]">
+        {label}
+      </span>
+      <span className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-gold font-mono text-[0.6rem] font-bold text-[#2B070C]">
+        {count}
+      </span>
+    </button>
+  );
+}
+
+function Option({ i, text, correct, chosen, locked, cut, onPick }) {
   const isChosen = chosen === i;
   const isCorrect = i === correct;
+  const isCut = cut.includes(i);
 
   let cls = 'border-edge hover:border-[#5C3542]';
   let keyCls = 'border-edge text-dust';
@@ -61,13 +94,15 @@ function Option({ i, text, correct, chosen, locked, onPick }) {
       keyCls = 'border-frost bg-frost text-frostink';
       state = 'no';
     } else cls = 'border-edge opacity-50';
+  } else if (isCut) {
+    cls = 'border-edge bg-panel/40 line-through opacity-40';
   }
 
   return (
     <button
       type="button"
       onClick={onPick}
-      disabled={locked}
+      disabled={locked || isCut}
       className={`flex min-h-[62px] w-full items-center gap-3.5 rounded-xl border-[1.5px] bg-panel2 px-4 py-3 text-left font-medium leading-snug text-cream transition active:scale-[.97] disabled:cursor-default md:min-h-[76px] ${cls} ${locked && isChosen ? 'animate-stamp' : ''}`}
     >
       <span
@@ -99,6 +134,7 @@ export default function BattleScreen({ g }) {
   const { q } = g;
   const chosen = g.locked ? g.answers[g.answers.length - 1] : null;
   const enemyDown = g.monsterPhase === 'hit' || g.monsterPhase === 'dead';
+  const lastLevel = g.index === g.total - 1;
 
   return (
     <section
@@ -149,7 +185,7 @@ export default function BattleScreen({ g }) {
         <div className="flex items-center gap-3.5">
           <div
             ref={g.spriteRef}
-            className={`monster ${g.monster.boss ? 'w-20' : 'w-16'} shrink-0 ${g.mood} ${g.monsterPhase !== 'idle' ? g.monsterPhase : ''}`}
+            className={`monster ${g.monster.boss ? 'boss w-20' : 'w-16'} shrink-0 ${g.mood} ${g.monsterPhase !== 'idle' ? g.monsterPhase : ''}`}
             dangerouslySetInnerHTML={{ __html: monsterSVG(g.monster) }}
           />
           <div className="min-w-0 flex-1">
@@ -180,6 +216,14 @@ export default function BattleScreen({ g }) {
             YOUR HP
           </span>
           <Hearts hearts={g.hearts} brokeAt={g.brokeAt} max={HEARTS_MAX} />
+          {g.shieldActive && (
+            <span
+              className="animate-shieldpulse ml-1 grid h-5 w-5 place-items-center rounded-full bg-gold/15 text-gold"
+              title="Shield active — next mistake is free"
+            >
+              <Icon name="shield" className="h-3.5 w-3.5" />
+            </span>
+          )}
         </div>
 
         {g.statusStamp && (
@@ -200,6 +244,8 @@ export default function BattleScreen({ g }) {
         total={QUESTION_TIME}
         warn={g.warn}
         danger={g.danger}
+        frozen={g.frozen}
+        frozenLeft={g.frozenLeft}
       />
       {g.warn && (
         <p
@@ -217,6 +263,29 @@ export default function BattleScreen({ g }) {
           DANGER! {Math.ceil(g.remaining)} SECONDS!
         </p>
       )}
+
+      {/* power-ups */}
+      <div className="mb-2 flex items-center gap-2">
+        <PowerButton
+          icon="cut"
+          label="50/50"
+          count={g.powerups.cut}
+          disabled={!g.canCut}
+          onClick={g.useCut}
+        />
+        <PowerButton
+          icon="snow"
+          label="FREEZE"
+          count={g.powerups.freeze}
+          disabled={!g.canFreeze}
+          onClick={g.useFreeze}
+        />
+        <span
+          className={`ml-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[0.62rem] tracking-[0.14em] ${g.shieldActive ? 'animate-shieldpulse border-gold/50 bg-gold/10 text-gold' : 'border-edge bg-panel text-dust opacity-60'}`}
+        >
+          <Icon name="shield" className="h-3.5 w-3.5" /> SHIELD
+        </span>
+      </div>
 
       {/* question */}
       <article
@@ -238,6 +307,7 @@ export default function BattleScreen({ g }) {
               correct={q.correctAnswer}
               chosen={chosen}
               locked={g.locked}
+              cut={g.eliminated}
               onPick={() => g.chooseAnswer(i)}
             />
           ))}
@@ -288,9 +358,29 @@ export default function BattleScreen({ g }) {
           disabled={!g.locked}
           className={BTN_PRIMARY}
         >
-          {g.index === g.total - 1 ? 'Finish Game' : 'Next Level'}
+          {lastLevel ? 'Finish Game' : 'Next Level'}
         </button>
       </div>
+
+      {/* "MONSTER APPEARS!" intro card */}
+      {g.intro && (
+        <div
+          className="fixed inset-0 z-[85] grid place-items-center bg-[rgba(10,4,7,.9)]"
+          aria-hidden="true"
+        >
+          <div key={g.intro.id} className="animate-intro text-center">
+            <p className="font-mono text-sm tracking-[0.3em] text-dust">
+              LEVEL {String(g.index + 1).padStart(2, '0')}
+            </p>
+            <h3 className="mt-2 font-display text-[clamp(2rem,10vw,3.5rem)] text-blood [text-shadow:0_0_30px_rgba(255,70,85,.5)]">
+              {g.monster.name}
+            </h3>
+            <p className="mt-2 font-mono text-xs tracking-[0.25em] text-gold">
+              {g.monster.boss ? 'FINAL BOSS BATTLE' : 'APPEARS!'}
+            </p>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

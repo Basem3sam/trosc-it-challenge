@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useGame from './useGame';
 import WelcomeScreen from './WelcomeScreen';
 import BattleScreen from './BattleScreen';
@@ -17,6 +17,21 @@ export default function Game() {
     const unlock = () => unlockAudio();
     document.addEventListener('pointerdown', unlock, { once: true });
     return () => document.removeEventListener('pointerdown', unlock);
+  }, []);
+
+  // floating embers — generated after mount to avoid hydration mismatch
+  const [particles, setParticles] = useState([]);
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: 14 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        size: 2 + Math.random() * 4,
+        dur: 14 + Math.random() * 18,
+        delay: -Math.random() * 20,
+        op: 0.1 + Math.random() * 0.2,
+      })),
+    );
   }, []);
 
   return (
@@ -38,8 +53,30 @@ export default function Game() {
           className="border-b border-dotted border-blood text-blood no-underline"
         >
           trosc.vercel.app
-        </a>
+        </a>{' '}
+        · ARCADE v2
       </footer>
+
+      {/* floating embers */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      >
+        {particles.map((p) => (
+          <span
+            key={p.id}
+            className="particle"
+            style={{
+              left: `${p.left}%`,
+              width: p.size,
+              height: p.size,
+              opacity: p.op,
+              animationDuration: `${p.dur}s`,
+              animationDelay: `${p.delay}s`,
+            }}
+          />
+        ))}
+      </div>
 
       {/* combo fire — gold screen edges at streak ×3+ */}
       {g.screen === 'battle' && g.combo >= 3 && (
@@ -57,11 +94,28 @@ export default function Game() {
         />
       )}
 
+      {/* FROZEN — icy screen edges while the clock is stopped */}
+      {g.frozen && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-0 z-[62] animate-frost [box-shadow:inset_0_0_100px_rgba(127,216,255,.35)]"
+        />
+      )}
+
       {/* one-shot blue vignette when hit */}
       {g.vignette && (
         <div
           aria-hidden="true"
           className="pointer-events-none fixed inset-0 z-[65] animate-vign [box-shadow:inset_0_0_120px_rgba(77,159,255,.5)]"
+        />
+      )}
+
+      {/* white hit-flash on every kill */}
+      {g.flash > 0 && (
+        <div
+          key={g.flash}
+          aria-hidden="true"
+          className="animate-flash pointer-events-none fixed inset-0 z-[75] bg-[rgba(255,238,238,.9)]"
         />
       )}
 
@@ -115,30 +169,8 @@ export default function Game() {
         </span>
       ))}
 
-      {/* victory confetti rain */}
-      {g.confetti.length > 0 && (
-        <div
-          aria-hidden="true"
-          className="pointer-events-none fixed inset-0 z-[70] overflow-hidden"
-        >
-          {g.confetti.map((p) => (
-            <i
-              key={p.id}
-              className="animate-confetti absolute -top-[6vh]"
-              style={{
-                left: `${p.left}vw`,
-                width: p.size,
-                height: p.size,
-                borderRadius: p.round ? '50%' : '2px',
-                background: p.color,
-                '--spin': `${p.spin}deg`,
-                '--d': `${p.dur}s`,
-                animationDelay: `${p.delay}s`,
-              }}
-            />
-          ))}
-        </div>
-      )}
+      {/* CRT arcade overlay — scanlines + vignette, above everything visual */}
+      <div aria-hidden="true" className="crt-layer" />
 
       {/* sound toggle — always reachable */}
       <button
@@ -146,7 +178,7 @@ export default function Game() {
         onClick={g.toggleMute}
         aria-pressed={g.muted}
         aria-label={g.muted ? 'Turn sound on' : 'Turn sound off'}
-        className="fixed right-[calc(10px+env(safe-area-inset-right))] top-[calc(10px+env(safe-area-inset-top))] z-[60] grid h-[46px] w-[46px] place-items-center rounded-xl border border-edge bg-panel text-dust transition hover:text-cream aria-pressed:text-blood"
+        className="fixed right-[calc(10px+env(safe-area-inset-right))] top-[calc(10px+env(safe-area-inset-top))] z-[106] grid h-[46px] w-[46px] place-items-center rounded-xl border border-edge bg-panel text-dust transition hover:text-cream aria-pressed:text-blood"
       >
         <Icon name={g.muted ? 'soundOff' : 'soundOn'} className="h-5 w-5" />
       </button>
@@ -155,7 +187,7 @@ export default function Game() {
       <div
         role="status"
         aria-live="polite"
-        className={`fixed bottom-[calc(24px+env(safe-area-inset-bottom))] left-1/2 z-[95] max-w-[calc(100vw-40px)] -translate-x-1/2 rounded-full border border-edge bg-panel2 px-5 py-2.5 text-center text-[0.95rem] transition-all duration-300 ${g.toastMsg ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'}`}
+        className={`fixed bottom-[calc(24px+env(safe-area-inset-bottom))] left-1/2 z-[107] max-w-[calc(100vw-40px)] -translate-x-1/2 rounded-full border border-edge bg-panel2 px-5 py-2.5 text-center text-[0.95rem] transition-all duration-300 ${g.toastMsg ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'}`}
       >
         {g.toastMsg}
       </div>

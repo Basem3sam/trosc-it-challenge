@@ -1,17 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { Icon } from '@/lib/icons';
+import { Icon, HeartIcon } from '@/lib/icons';
 import { BTN_PRIMARY, BTN_GHOST, INPUT } from '@/lib/ui';
 import {
   TOTAL,
   QUESTION_TIME,
   HEARTS_MAX,
+  POWERUP_EVERY,
   JOIN_FORM_URL,
   SITE_URL,
 } from '@/lib/game';
 
-const TICKER = `TROSC ✦ SUEZ CANAL UNIVERSITY ✦ IT CHALLENGE ✦ ${TOTAL} MONSTERS ✦ DEFEAT THEM ALL ✦ BEAT YOUR BEST ✦\u00A0`;
+const TICKER = `TROSC ✦ SUEZ CANAL UNIVERSITY ✦ IT CHALLENGE ✦ ${TOTAL} MONSTERS ✦ POWER-UPS ✦ BEAT YOUR BEST ✦\u00A0`;
 
 export default function WelcomeScreen({ best, onStart }) {
   const [name, setName] = useState('');
@@ -84,9 +85,7 @@ export default function WelcomeScreen({ best, onStart }) {
       >
         IT
         <br />
-        <span className="text-blood [text-shadow:0_0_30px_rgba(255,70,85,.35)]">
-          Challenge
-        </span>
+        <span className="text-gradient">Challenge</span>
         <span
           className="ml-1 inline-block h-[0.72em] w-[0.45ch] translate-y-[0.06em] animate-blink bg-blood"
           aria-hidden="true"
@@ -142,6 +141,28 @@ export default function WelcomeScreen({ best, onStart }) {
           <Icon name="trophy" className="h-4 w-4" /> YOUR BEST: {best}/{TOTAL}
         </p>
       )}
+
+      {/* how to play */}
+      <div className="mt-5 rounded-[14px] border border-edge bg-panel p-4">
+        <p className="mb-2.5 font-mono text-[0.66rem] tracking-[0.2em] text-dust">
+          HOW TO PLAY
+        </p>
+        <ul className="grid gap-2 text-[0.9rem] text-dust">
+          <li className="flex items-center gap-2.5">
+            <Icon name="sword" className="h-4 w-4 shrink-0 text-blood" />
+            Answer correctly to attack — every {POWERUP_EVERY}rd correct earns a
+            POWER-UP
+          </li>
+          <li className="flex items-center gap-2.5">
+            <HeartIcon className="h-4 w-4 shrink-0 text-blood" />
+            Wrong answers and timeouts cost a heart — you have {HEARTS_MAX}
+          </li>
+          <li className="flex items-center gap-2.5">
+            <Icon name="snow" className="h-4 w-4 shrink-0 text-gold" />
+            Use 50/50 and FREEZE wisely… the boss is waiting at the end
+          </li>
+        </ul>
+      </div>
 
       <a
         href={JOIN_FORM_URL}

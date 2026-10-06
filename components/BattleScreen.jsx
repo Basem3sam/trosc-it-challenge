@@ -361,26 +361,6 @@ export default function BattleScreen({ g }) {
           {lastLevel ? 'Finish Game' : 'Next Level'}
         </button>
       </div>
-
-      {/* "MONSTER APPEARS!" intro card */}
-      {g.intro && (
-        <div
-          className="fixed inset-0 z-[85] grid place-items-center bg-[rgba(10,4,7,.9)]"
-          aria-hidden="true"
-        >
-          <div key={g.intro.id} className="animate-intro text-center">
-            <p className="font-mono text-sm tracking-[0.3em] text-dust">
-              LEVEL {String(g.index + 1).padStart(2, '0')}
-            </p>
-            <h3 className="mt-2 font-display text-[clamp(2rem,10vw,3.5rem)] text-blood [text-shadow:0_0_30px_rgba(255,70,85,.5)]">
-              {g.monster.name}
-            </h3>
-            <p className="mt-2 font-mono text-xs tracking-[0.25em] text-gold">
-              {g.monster.boss ? 'FINAL BOSS BATTLE' : 'APPEARS!'}
-            </p>
-          </div>
-        </div>
-      )}
     </section>
   );
 }

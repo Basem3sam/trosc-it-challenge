@@ -258,7 +258,7 @@ export default function Game() {
       <div
         role="status"
         aria-live="polite"
-        className={`fixed bottom-[calc(24px+env(safe-area-inset-bottom))] left-1/2 z-[107] max-w-[calc(100vw-40px)] -translate-x-1/2 rounded-full border border-edge bg-panel2 px-5 py-2.5 text-center text-[0.95rem] transition-all duration-300 ${g.toastMsg ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'}`}
+        className={`fixed bottom-[calc(24px+env(safe-area-inset-bottom))] left-1/2 z-[107] max-w-[calc(100vw-40px)] -translate-x-1/2 rounded-full border border-edge bg-panel2 px-5 py-2.5 text-center text-[0.95rem] transition-all duration-300 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] ${g.toastMsg ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'}`}
       >
         {g.toastMsg}
       </div>

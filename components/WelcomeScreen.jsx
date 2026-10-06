@@ -14,8 +14,125 @@ import {
 
 const TICKER = `TROSC ✦ SUEZ CANAL UNIVERSITY ✦ TROSC CHALLENGE ✦ ${TOTAL} MONSTERS ✦ POWER-UPS ✦ BEAT YOUR BEST ✦\u00A0`;
 
-/* stagger helper */
 const rise = (i) => ({ animationDelay: `${i * 70}ms` });
+
+function HowToPlay({ every, hearts, total }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div
+      className="mt-4 animate-rise-in overflow-hidden rounded-[14px] border border-edge bg-panel"
+      style={rise(6)}
+    >
+      {/* header = real button, clearly interactive, clearly pretty */}
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls="howto-body"
+        className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-200 active:scale-[0.99] hover:bg-panel2/50 ${open ? 'bg-panel2/40' : ''}`}
+      >
+        <span
+          className={`grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors duration-300 ${open ? 'bg-blood text-bloodink' : 'bg-blood/15 text-blood'}`}
+        >
+          <Icon name="help" className="h-4.5 w-4.5" />
+        </span>
+        <span className="min-w-0 flex-1 leading-tight">
+          <span className="block font-mono text-[0.74rem] font-bold tracking-[0.24em] text-cream">
+            HOW TO PLAY
+          </span>
+          <span className="block text-[0.7rem] text-dust">
+            Rules · power-ups · the final boss
+          </span>
+        </span>
+        <span
+          aria-hidden="true"
+          className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border transition-all duration-300 ${open ? 'rotate-180 border-blood/40 bg-blood/15 text-blood' : 'border-edge text-dust'}`}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-3.5 w-3.5"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </span>
+      </button>
+
+      {/* animated body — grid-rows 0fr→1fr, works in all modern browsers */}
+      <div
+        id="howto-body"
+        className="grid transition-[grid-template-rows] duration-300 ease-out"
+        style={{ gridTemplateRows: open ? '1fr' : '0fr' }}
+        role="region"
+        aria-label="How to play"
+      >
+        <div
+          className={`min-h-0 overflow-hidden transition-opacity duration-200 ${open ? 'opacity-100' : 'opacity-0'}`}
+        >
+          <div className="border-t border-dashed border-edge px-4 pb-4 pt-3.5">
+            <ul className="grid gap-2.5 text-[0.9rem] text-dust">
+              <li className="flex items-center gap-2.5">
+                <Icon name="sword" className="h-4 w-4 shrink-0 text-blood" />
+                Answer correctly to attack the monster
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Icon name="bolt" className="h-4 w-4 shrink-0 text-gold" />
+                <span>
+                  Every{' '}
+                  <b className="text-cream">{every} correct answers in a row</b>{' '}
+                  earn a random POWER-UP
+                </span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <HeartIcon className="h-4 w-4 shrink-0 text-blood" />
+                Wrong answers and timeouts cost a heart — you have {hearts}
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Icon name="trophy" className="h-4 w-4 shrink-0 text-gold" />
+                Beat all {total} levels — the FINAL BOSS guards the last one
+              </li>
+            </ul>
+
+            <div className="mt-3 grid grid-cols-3 gap-2 border-t border-dashed border-edge pt-3">
+              <div className="rounded-xl border border-edge bg-panel2 p-2.5 text-center">
+                <Icon name="cut" className="mx-auto h-4 w-4 text-gold" />
+                <p className="mt-1 font-mono text-[0.62rem] font-bold tracking-[0.08em] text-cream">
+                  50/50
+                </p>
+                <p className="mt-0.5 text-[0.68rem] leading-tight text-dust">
+                  cuts 2 wrong answers
+                </p>
+              </div>
+              <div className="rounded-xl border border-edge bg-panel2 p-2.5 text-center">
+                <Icon name="snow" className="mx-auto h-4 w-4 text-gold" />
+                <p className="mt-1 font-mono text-[0.62rem] font-bold tracking-[0.08em] text-cream">
+                  FREEZE
+                </p>
+                <p className="mt-0.5 text-[0.68rem] leading-tight text-dust">
+                  stops the clock
+                </p>
+              </div>
+              <div className="rounded-xl border border-edge bg-panel2 p-2.5 text-center">
+                <Icon name="shield" className="mx-auto h-4 w-4 text-gold" />
+                <p className="mt-1 font-mono text-[0.62rem] font-bold tracking-[0.08em] text-cream">
+                  SHIELD
+                </p>
+                <p className="mt-0.5 text-[0.68rem] leading-tight text-dust">
+                  blocks one hit — automatic
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function WelcomeScreen({ best, onStart }) {
   const [name, setName] = useState('');
@@ -36,7 +153,6 @@ export default function WelcomeScreen({ best, onStart }) {
 
   return (
     <section aria-labelledby="welcome-title" className="w-full">
-      {/* ticker */}
       <div
         className="mb-4 overflow-hidden rounded-full border border-edge bg-panel"
         aria-hidden="true"
@@ -51,7 +167,6 @@ export default function WelcomeScreen({ best, onStart }) {
         </div>
       </div>
 
-      {/* brand */}
       <header
         className="mb-4 flex items-center gap-3 animate-rise-in"
         style={rise(0)}
@@ -82,7 +197,6 @@ export default function WelcomeScreen({ best, onStart }) {
         </span>
       </header>
 
-      {/* title — blur-rises in, gradient word + scan underline */}
       <div className="relative mb-1 animate-title-in" style={rise(1)}>
         <h1
           id="welcome-title"
@@ -108,19 +222,29 @@ export default function WelcomeScreen({ best, onStart }) {
         {TOTAL} monsters. {QUESTION_TIME} seconds each. Slay them all!
       </p>
 
-      {/* form */}
       <form
         onSubmit={submit}
         noValidate
         className="grid gap-2.5 animate-rise-in"
         style={rise(3)}
       >
-        <label
-          htmlFor="name-input"
-          className="block font-mono text-[0.78rem] tracking-[0.16em] text-dust"
-        >
-          &gt; PLAYER NAME
-        </label>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-2 font-mono">
+          <label
+            htmlFor="name-input"
+            className="text-[0.78rem] tracking-[0.16em] text-dust"
+          >
+            &gt; PLAYER NAME
+          </label>
+          {best !== null && (
+            <span
+              className="ml-auto inline-flex items-center gap-1 text-[0.7rem] font-bold tracking-[0.1em] text-gold"
+              title="Your best score on this phone"
+            >
+              <Icon name="trophy" className="h-3.5 w-3.5" /> YOUR BEST {best}/
+              {TOTAL}
+            </span>
+          )}
+        </div>
         <input
           id="name-input"
           type="text"
@@ -151,7 +275,6 @@ export default function WelcomeScreen({ best, onStart }) {
         </button>
       </form>
 
-      {/* meta — left/right one-line row, wraps centered on tiny screens */}
       <p
         className="mt-4 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-0.5 text-center font-mono text-[0.58rem] text-dust animate-rise-in sm:flex-nowrap sm:justify-between sm:text-[clamp(0.5rem,2.5vw,0.72rem)]"
         style={rise(4)}
@@ -164,86 +287,7 @@ export default function WelcomeScreen({ best, onStart }) {
         </span>
       </p>
 
-      {best !== null && (
-        <p
-          className="mx-auto mt-3 flex w-fit items-center gap-2 rounded-full border border-gold/35 bg-gold/10 px-3.5 py-2 font-mono text-[0.72rem] tracking-[0.14em] text-gold animate-rise-in"
-          style={rise(5)}
-        >
-          <Icon name="trophy" className="h-4 w-4" /> YOUR BEST: {best}/{TOTAL}
-        </p>
-      )}
-
-      {/* how to play — collapsible */}
-      <details
-        className="mt-4 rounded-[14px] border border-edge bg-panel animate-rise-in"
-        style={rise(6)}
-      >
-        <summary className="flex cursor-pointer select-none list-none items-center justify-between px-4 py-3 font-mono text-[0.7rem] font-bold tracking-[0.2em] text-dust transition-colors hover:text-cream">
-          HOW TO PLAY
-          <span
-            aria-hidden="true"
-            className="text-blood transition-transform duration-200 [details[open]_&]:rotate-90"
-          >
-            ▸
-          </span>
-        </summary>
-        <div className="px-4 pb-4">
-          <ul className="grid gap-2.5 text-[0.9rem] text-dust">
-            <li className="flex items-center gap-2.5">
-              <Icon name="sword" className="h-4 w-4 shrink-0 text-blood" />
-              Answer correctly to attack the monster
-            </li>
-            <li className="flex items-center gap-2.5">
-              <Icon name="bolt" className="h-4 w-4 shrink-0 text-gold" />
-              <span>
-                Every{' '}
-                <b className="text-cream">
-                  {POWERUP_EVERY} correct answers in a row
-                </b>{' '}
-                earn a random POWER-UP
-              </span>
-            </li>
-            <li className="flex items-center gap-2.5">
-              <HeartIcon className="h-4 w-4 shrink-0 text-blood" />
-              Wrong answers and timeouts cost a heart — you have {HEARTS_MAX}
-            </li>
-            <li className="flex items-center gap-2.5">
-              <Icon name="trophy" className="h-4 w-4 shrink-0 text-gold" />
-              Beat all {TOTAL} levels — the FINAL BOSS guards the last one
-            </li>
-          </ul>
-
-          <div className="mt-3 grid grid-cols-3 gap-2 border-t border-dashed border-edge pt-3">
-            <div className="rounded-xl border border-edge bg-panel2 p-2.5 text-center">
-              <Icon name="cut" className="mx-auto h-4 w-4 text-gold" />
-              <p className="mt-1 font-mono text-[0.62rem] font-bold tracking-[0.08em] text-cream">
-                50/50
-              </p>
-              <p className="mt-0.5 text-[0.68rem] leading-tight text-dust">
-                cuts 2 wrong answers
-              </p>
-            </div>
-            <div className="rounded-xl border border-edge bg-panel2 p-2.5 text-center">
-              <Icon name="snow" className="mx-auto h-4 w-4 text-gold" />
-              <p className="mt-1 font-mono text-[0.62rem] font-bold tracking-[0.08em] text-cream">
-                FREEZE
-              </p>
-              <p className="mt-0.5 text-[0.68rem] leading-tight text-dust">
-                stops the clock
-              </p>
-            </div>
-            <div className="rounded-xl border border-edge bg-panel2 p-2.5 text-center">
-              <Icon name="shield" className="mx-auto h-4 w-4 text-gold" />
-              <p className="mt-1 font-mono text-[0.62rem] font-bold tracking-[0.08em] text-cream">
-                SHIELD
-              </p>
-              <p className="mt-0.5 text-[0.68rem] leading-tight text-dust">
-                blocks one hit — automatic
-              </p>
-            </div>
-          </div>
-        </div>
-      </details>
+      <HowToPlay every={POWERUP_EVERY} hearts={HEARTS_MAX} total={TOTAL} />
 
       <div className="animate-rise-in" style={rise(7)}>
         <a

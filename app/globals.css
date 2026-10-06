@@ -365,7 +365,7 @@
 @keyframes optIn {
   from {
     opacity: 0;
-    transform: translateX(16px);
+    transform: translateY(12px) scale(0.97);
   }
   to {
     opacity: 1;
@@ -540,25 +540,17 @@ body::before {
 /* --------------------------------------------------------------------------
    Battle scroller — thin retro scrollbar on the INNER question scroller
    -------------------------------------------------------------------------- */
+/* Battle scroller — native scrollbar fully hidden (zero layout width);
+   a floating custom thumb is drawn in JSX instead, so content stays centered */
 .battle-scroll {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-edge) transparent;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* old Edge */
 }
 .battle-scroll::-webkit-scrollbar {
-  width: 6px;
-}
-.battle-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-.battle-scroll::-webkit-scrollbar-thumb {
-  background: var(--color-edge);
-  border-radius: 999px;
-}
-.battle-scroll::-webkit-scrollbar-thumb:hover {
-  background: #5a3441;
-}
+  display: none;
+} /* Chrome/Safari */
 
 /* -------------------------------------------------------------------------- 
    Rising fire embers

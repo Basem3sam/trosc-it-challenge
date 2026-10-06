@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Icon, HeartIcon } from '@/lib/icons';
 import { monsterSVG } from '@/lib/monsters';
 import { BTN_PRIMARY } from '@/lib/ui';
@@ -219,23 +219,106 @@ function Option({ i, text, correct, chosen, locked, cut, onPick }) {
   );
 }
 
+/* --------------------------------------------------------------------------
+   Scroll area: hidden native bar (no layout width → content stays centered),
+   floating custom thumb that fades when idle, soft fade masks top/bottom.
+   -------------------------------------------------------------------------- */
+function Scroller({ resetKey, follow, children }) {
+  const ref = useRef(null);
+  const [bar, setBar] = useState({ h: 0, y: 0, show: false });
+  const [edges, setEdges] = useState({ top: false, bottom: false });
+  const hideT = useRef(null);
+
+  const measure = () => {
+    const el = ref.current;
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    const max = scrollHeight - clientHeight;
+    setEdges({ top: scrollTop > 4, bottom: max > 4 && scrollTop < max - 4 });
+    if (max <= 2) {
+      setBar((b) => ({ ...b, h: 0, show: false }));
+      return;
+    }
+    const h = Math.max(0.15, clientHeight / scrollHeight);
+    setBar({ h, y: scrollTop / max, show: true });
+    clearTimeout(hideT.current);
+    hideT.current = setTimeout(
+      () => setBar((b) => ({ ...b, show: false })),
+      900,
+    );
+  };
+
+  /* new level → back to top; answered → glide down to the battle report */
+  useEffect(() => {
+    ref.current?.scrollTo({ top: 0 });
+    measure();
+  }, [resetKey]);
+  useEffect(() => {
+    if (follow)
+      ref.current?.scrollTo({
+        top: ref.current.scrollHeight,
+        behavior: 'smooth',
+      });
+  }, [follow]);
+
+  /* keep thumb/masks honest when content resizes */
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      clearTimeout(hideT.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const thumbVisible = bar.show && bar.h > 0 && bar.h < 0.995;
+
+  return (
+    <div className="relative min-h-0 flex-1">
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-7 bg-gradient-to-b from-night to-transparent transition-opacity duration-200 ${edges.top ? 'opacity-100' : 'opacity-0'}`}
+      />
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 h-7 bg-gradient-to-t from-night to-transparent transition-opacity duration-200 ${edges.bottom ? 'opacity-100' : 'opacity-0'}`}
+      />
+
+      <div
+        ref={ref}
+        onScroll={measure}
+        className="battle-scroll h-full overflow-y-auto px-1 pb-2"
+      >
+        {children}
+      </div>
+
+      {/* floating thumb — absolute, so it never takes layout space */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-2 right-[3px] w-[5px]"
+      >
+        <div
+          className="absolute left-0 w-full rounded-full bg-edge/80 transition-opacity duration-200"
+          style={{
+            height: `${bar.h * 100}%`,
+            top: `${bar.y * (1 - bar.h) * 100}%`,
+            opacity: thumbVisible ? 1 : 0,
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function BattleScreen({ g }) {
   const { q } = g;
   const chosen = g.locked ? g.answers[g.answers.length - 1] : null;
   const enemyDown = g.monsterPhase === 'hit' || g.monsterPhase === 'dead';
   const lastLevel = g.index === g.total - 1;
-
-  /* the OPTION LIST + report scroll internally — question text is fixed chrome */
-  const scrollRef = useRef(null);
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: 0 });
-  }, [g.index]);
-  useEffect(() => {
-    if (g.locked) {
-      const el = scrollRef.current;
-      el?.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
-    }
-  }, [g.locked]);
 
   return (
     <section
@@ -392,10 +475,10 @@ export default function BattleScreen({ g }) {
         </div>
       </div>
 
-      {/* QUESTION — fixed chrome, always visible */}
+      {/* QUESTION — fixed chrome, always visible; the gap below is the rhythm */}
       <article
         key={g.index}
-        className={`shrink-0 animate-card-in rounded-2xl border border-edge bg-panel p-[clamp(0.95rem,3.4vw,1.4rem)] ${g.cardShake ? 'animate-shake' : ''}`}
+        className={`mb-2.5 shrink-0 animate-card-in rounded-2xl border border-edge bg-panel p-[clamp(0.95rem,3.4vw,1.4rem)] ${g.cardShake ? 'animate-shake' : ''}`}
       >
         <h2
           id="question-text"
@@ -405,12 +488,9 @@ export default function BattleScreen({ g }) {
         </h2>
       </article>
 
-      {/* OPTIONS + battle report — the ONLY scrolling region (thin retro scrollbar) */}
-      <div
-        ref={scrollRef}
-        className="battle-scroll min-h-0 flex-1 overflow-y-auto pt-2.5"
-      >
-        <div className="grid gap-2 pb-2.5">
+      {/* OPTIONS + battle report — the ONLY scrolling region */}
+      <Scroller resetKey={g.index} follow={g.locked}>
+        <div className="grid gap-2">
           {q.options.map((opt, i) => (
             <Option
               key={i}
@@ -429,7 +509,7 @@ export default function BattleScreen({ g }) {
           <div
             role="status"
             aria-live="polite"
-            className={`animate-card-in mb-2 rounded-xl border p-3.5 ${g.feedback.ok ? 'border-blood/45 bg-blood/10' : 'border-frost/45 bg-frost/10'}`}
+            className={`animate-card-in mb-1 mt-2.5 rounded-xl border p-3.5 ${g.feedback.ok ? 'border-blood/45 bg-blood/10' : 'border-frost/45 bg-frost/10'}`}
           >
             <div className="flex items-start gap-3">
               <span
@@ -460,7 +540,7 @@ export default function BattleScreen({ g }) {
             </div>
           </div>
         )}
-      </div>
+      </Scroller>
 
       {/* CTA — always visible */}
       <div className="shrink-0 pb-[calc(0.6rem+env(safe-area-inset-bottom))] pt-2">

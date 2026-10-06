@@ -101,7 +101,7 @@ export default function Game() {
           >
             trosc.vercel.app
           </a>{' '}
-          · ARCADE v2
+          · ARCADE
         </footer>
       )}
 

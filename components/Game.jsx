@@ -244,16 +244,84 @@ export default function Game() {
       {/* CRT arcade overlay */}
       <div aria-hidden="true" className="crt-layer" />
 
-      {/* sound toggle */}
-      <button
-        type="button"
-        onClick={g.toggleMute}
-        aria-pressed={g.muted}
-        aria-label={g.muted ? 'Turn sound on' : 'Turn sound off'}
-        className="fixed right-[calc(10px+env(safe-area-inset-right))] top-[calc(10px+env(safe-area-inset-top))] z-[106] grid h-[46px] w-[46px] place-items-center rounded-xl border border-edge bg-panel text-dust transition hover:text-cream aria-pressed:text-blood"
-      >
-        <Icon name={g.muted ? 'soundOff' : 'soundOn'} className="h-5 w-5" />
-      </button>
+      {/* audio control — music & SFX toggles */}
+      <div className="fixed right-[calc(10px+env(safe-area-inset-right))] top-[calc(10px+env(safe-area-inset-top))] z-[106] flex flex-col items-end gap-1.5">
+        <button
+          type="button"
+          onClick={g.toggleMusic}
+          aria-pressed={g.musicOn}
+          aria-label={
+            g.musicOn ? 'Mute background music' : 'Unmute background music'
+          }
+          title={g.musicOn ? 'Music: on' : 'Music: off'}
+          className={`grid h-[42px] w-[42px] place-items-center rounded-xl border transition ${
+            g.musicOn
+              ? 'border-edge bg-panel text-cream hover:text-gold'
+              : 'border-edge bg-panel text-dust opacity-60'
+          }`}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-5 w-5"
+            aria-hidden="true"
+          >
+            <path d="M9 18V5l12-2v13" />
+            <circle cx="6" cy="18" r="3" />
+            <circle cx="18" cy="16" r="3" />
+            {!g.musicOn && (
+              <line
+                x1="2"
+                y1="2"
+                x2="22"
+                y2="22"
+                className="text-blood"
+                strokeWidth="2.6"
+              />
+            )}
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={g.toggleSfx}
+          aria-pressed={g.sfxOn}
+          aria-label={g.sfxOn ? 'Mute sound effects' : 'Unmute sound effects'}
+          title={g.sfxOn ? 'Effects: on' : 'Effects: off'}
+          className={`grid h-[42px] w-[42px] place-items-center rounded-xl border transition ${
+            g.sfxOn
+              ? 'border-edge bg-panel text-cream hover:text-gold'
+              : 'border-edge bg-panel text-dust opacity-60'
+          }`}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-5 w-5"
+            aria-hidden="true"
+          >
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            {g.sfxOn ? (
+              <>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+              </>
+            ) : (
+              <>
+                <line x1="22" y1="9" x2="16" y2="15" />
+                <line x1="16" y1="9" x2="22" y2="15" />
+              </>
+            )}
+          </svg>
+        </button>
+      </div>
 
       {/* toast — status only: never intercepts taps (pointer-events-none),
           and in battle it floats ABOVE the Next button instead of covering it */}

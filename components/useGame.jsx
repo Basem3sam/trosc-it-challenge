@@ -5,7 +5,8 @@ import { ENEMIES, BOSS } from '@/lib/monsters';
 import {
   sfx,
   buzz,
-  setMuted,
+  setMusicEnabled,
+  setSfxEnabled,
   startMusic,
   stopMusic,
   setMusicDanger,
@@ -24,7 +25,8 @@ import {
   FREEZE_TIME,
   POWERUP_EVERY,
   POWERUP_CAP,
-  MUTE_KEY,
+  MUSIC_KEY,
+  SFX_KEY,
   loadProgress,
   saveProgress,
   clearProgress,
@@ -62,6 +64,10 @@ export default function useGame() {
   const [result, setResult] = useState(null); // { outcome, attempted, pct, by?, stats, badges, record }
   const [best, setBest] = useState(null);
 
+  /* ---------- audio prefs (independent music / sfx) ---------- */
+  const [musicOn, setMusicOnState] = useState(true);
+  const [sfxOn, setSfxOnState] = useState(true);
+
   /* ---------- power-ups ---------- */
   const [powerups, setPowerups] = useState({ cut: 1, freeze: 1 });
   const [shieldActive, setShieldActive] = useState(false);
@@ -85,8 +91,7 @@ export default function useGame() {
   const [vignette, setVignette] = useState(false);
   const [toastMsg, setToastMsg] = useState(null);
 
-  /* ---------- prefs ---------- */
-  const [muted, setMutedState] = useState(false);
+  /* ---------- misc prefs ---------- */
   const [reduced, setReduced] = useState(false);
 
   /* ---------- refs ---------- */
@@ -328,9 +333,7 @@ export default function useGame() {
     [later],
   );
 
-  /* ---------- level intro: "MONSTER APPEARS!" + that monster's spawn sting ----------
-     The dismiss is scheduled BEFORE the sting runs, and the sting is non-fatal —
-     a sound error can never block gameplay or leave the card stuck on screen. */
+  /* ---------- level intro: cleanup scheduled first, sting non-fatal ---------- */
   const showIntro = useCallback(
     (monster) => {
       introRef.current = true;
@@ -718,15 +721,29 @@ export default function useGame() {
     }
   }, [index, winGame, showIntro]);
 
-  const toggleMute = useCallback(() => {
-    const next = !muted;
-    setMutedState(next);
-    setMuted(next);
-    try {
-      localStorage.setItem(MUTE_KEY, next ? '1' : '0');
-    } catch (_) {}
-    if (!next) sfx.on();
-  }, [muted]);
+  /* ---------- audio toggles (independent music / sfx, persisted) ---------- */
+  const toggleMusic = useCallback(() => {
+    setMusicOnState((prev) => {
+      const next = !prev;
+      setMusicEnabled(next);
+      try {
+        localStorage.setItem(MUSIC_KEY, next ? '1' : '0');
+      } catch (_) {}
+      return next;
+    });
+    sfx.on();
+  }, []);
+
+  const toggleSfx = useCallback(() => {
+    setSfxOnState((prev) => {
+      const next = !prev;
+      setSfxEnabled(next);
+      try {
+        localStorage.setItem(SFX_KEY, next ? '1' : '0');
+      } catch (_) {}
+      return next;
+    });
+  }, []);
 
   /* ---------- per-question timer (pauses when hidden; respects Freeze) ---------- */
   useEffect(() => {
@@ -780,19 +797,27 @@ export default function useGame() {
     return () => clearInterval(id);
   }, [screen, index, locked, countdownStep, intro]);
 
-  /* ---------- battle music ---------- */
+  /* ---------- battle music (MUSIC family) ---------- */
   useEffect(() => {
-    if (screen === 'battle' && !muted) startMusic();
-    else stopMusic();
-    return () => stopMusic();
-  }, [screen, muted]);
+    try {
+      if (screen === 'battle' && musicOn) startMusic();
+      else stopMusic();
+    } catch (e) {
+      console.warn('music failed:', e);
+    }
+    return () => {
+      try {
+        stopMusic();
+      } catch (_) {}
+    };
+  }, [screen, musicOn]);
 
   /* ---------- global bits ---------- */
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [screen]);
 
-  /* ---------- init: prefs, best score, resume interrupted run ---------- */
+  /* ---------- init: audio prefs, best score, resume interrupted run ---------- */
   useEffect(() => {
     if (hydratedRef.current) return;
     hydratedRef.current = true;
@@ -802,12 +827,19 @@ export default function useGame() {
     ).matches;
     setReduced(reducedRef.current);
 
-    let m = false;
+    // audio prefs — default ON, persisted independently
+    let m = true,
+      s = true;
     try {
-      m = localStorage.getItem(MUTE_KEY) === '1';
+      m = localStorage.getItem(MUSIC_KEY) !== '0';
     } catch (_) {}
-    setMutedState(m);
-    setMuted(m);
+    try {
+      s = localStorage.getItem(SFX_KEY) !== '0';
+    } catch (_) {}
+    setMusicOnState(m);
+    setSfxOnState(s);
+    setMusicEnabled(m);
+    setSfxEnabled(s);
 
     const savedBest = loadBest();
     if (savedBest !== null) {
@@ -913,9 +945,9 @@ export default function useGame() {
     }
   }, [danger, index]);
 
-  /* low-HP heartbeat — only while fighting on your last heart */
+  /* low-HP heartbeat — MUSIC family, only on the last heart */
   useEffect(() => {
-    if (screen === 'battle' && hearts === 1 && !muted) {
+    if (screen === 'battle' && hearts === 1 && musicOn) {
       try {
         startHeartbeat();
       } catch (e) {
@@ -931,7 +963,7 @@ export default function useGame() {
         stopHeartbeat();
       } catch (_) {}
     };
-  }, [screen, hearts, muted]);
+  }, [screen, hearts, musicOn]);
 
   return {
     // state
@@ -951,7 +983,8 @@ export default function useGame() {
     feedback,
     result,
     best,
-    muted,
+    musicOn,
+    sfxOn,
     reduced,
     remaining,
     warn,
@@ -979,12 +1012,13 @@ export default function useGame() {
     canFreeze: answering && powerups.freeze > 0,
     useCut,
     useFreeze,
-    // refs & actions
+    // actions
     spriteRef,
     startGame,
     chooseAnswer,
     handleNext,
     retry,
-    toggleMute,
+    toggleMusic,
+    toggleSfx,
   };
 }

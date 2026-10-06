@@ -77,7 +77,7 @@ function PowerButton({ icon, label, hint, count, disabled, onClick }) {
       onClick={onClick}
       disabled={disabled}
       aria-label={`${label} power-up — ${hint}`}
-      className={`relative flex min-h-[44px] items-center gap-2.5 rounded-xl border-[1.5px] px-3.5 py-2 text-left transition
+      className={`relative flex min-h-[44px] w-full items-center gap-2.5 rounded-xl border-[1.5px] px-3.5 py-2 text-left transition md:w-auto
         ${
           disabled
             ? 'cursor-default border-edge bg-panel2 text-dust opacity-50'
@@ -485,8 +485,8 @@ export default function BattleScreen({ g }) {
         </p>
       )}
 
-      {/* power buttons + stat chips */}
-      <div className="mb-2 flex shrink-0 flex-wrap items-center gap-2 md:flex-nowrap">
+      {/* power buttons + stat chips — 2×2 grid on mobile, one row on desktop */}
+      <div className="mb-2 grid shrink-0 grid-cols-2 gap-2 md:flex md:flex-nowrap md:items-center">
         <PowerButton
           icon="cut"
           label="50/50"
@@ -503,10 +503,8 @@ export default function BattleScreen({ g }) {
           disabled={!g.canFreeze}
           onClick={g.useFreeze}
         />
-        <div className="ml-auto flex flex-nowrap items-center gap-2">
-          <NextPowerChip combo={g.combo} every={POWERUP_EVERY} />
-          <ShieldChip active={g.shieldActive} />
-        </div>
+        <NextPowerChip combo={g.combo} every={POWERUP_EVERY} />
+        <ShieldChip active={g.shieldActive} />
       </div>
 
       {/* QUESTION — fixed chrome */}

@@ -908,6 +908,21 @@ body::before {
   animation: spawnIn 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
 
+/* --------------------------------------------------------------------------
+   Selection control — buttons, HUD, stamps and decorative layers never
+   select on long-press/double-tap; prose and the name input stay selectable.
+   -------------------------------------------------------------------------- */
+body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+input[type='text'],
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

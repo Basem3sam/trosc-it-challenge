@@ -29,7 +29,7 @@ function ScoreRing({ pct, reduced }) {
     <div
       role="img"
       aria-label={`Accuracy ${Math.round(val)} percent`}
-      className="relative mx-auto mb-2 w-[clamp(150px,46vw,190px)]"
+      className="ring-glow relative mx-auto mb-2 w-[clamp(150px,46vw,190px)]"
     >
       <svg
         viewBox="0 0 120 120"
@@ -68,9 +68,12 @@ function ScoreRing({ pct, reduced }) {
   );
 }
 
-function Stat({ label, value }) {
+function Stat({ label, value, delay }) {
   return (
-    <div className="rounded-xl border border-edge bg-panel px-2 py-2">
+    <div
+      className="animate-rise-in rounded-xl border border-edge bg-panel px-2 py-2"
+      style={{ animationDelay: delay }}
+    >
       <p className="font-mono text-[0.58rem] tracking-[0.14em] text-dust">
         {label}
       </p>
@@ -84,20 +87,21 @@ export default function ResultScreen({ g }) {
   const { attempted, pct, by, stats, badges } = g.result;
   const tier = won ? tierFor(g.score) : null;
 
-  /* badges + rank share one centered row */
   const honorItems = won
     ? [
         ...(badges || []).map((b) => (
           <span
             key={b.label}
-            className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 font-mono text-[0.7rem] tracking-[0.12em] text-gold"
+            className="animate-rise-in inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 font-mono text-[0.7rem] tracking-[0.12em] text-gold"
+            style={{ animationDelay: '250ms' }}
           >
             <Icon name={b.icon} className="h-3.5 w-3.5" /> {b.label}
           </span>
         )),
         <span
           key="rank"
-          className="animate-rank-in inline-flex items-center gap-2.5 rounded-full border border-gold/45 bg-gold/10 px-4 py-1.5 font-mono text-[0.84rem] tracking-[0.14em] text-gold"
+          className={`animate-rank-in inline-flex items-center gap-2.5 rounded-full border border-gold/45 bg-gold/10 px-4 py-1.5 font-mono text-[0.84rem] tracking-[0.14em] text-gold ${tier.rank === 'S' ? 'rank-shine' : ''}`}
+          style={{ animationDelay: '350ms' }}
         >
           <Icon name="trophy" className="h-5 w-5" />
           <b
@@ -131,13 +135,16 @@ export default function ResultScreen({ g }) {
       >
         {won ? 'GAME COMPLETE!' : 'GAME OVER'}
       </h1>
-      <h2 className="mb-3 text-[clamp(1.8rem,8vw,2.5rem)] font-bold tracking-tight">
+      <h2
+        className="animate-rise-in mb-3 text-[clamp(1.8rem,8vw,2.5rem)] font-bold tracking-tight"
+        style={{ animationDelay: '80ms' }}
+      >
         {g.name}
       </h2>
 
       {!won && (
         <p className="mb-3 flex items-center justify-center gap-2 text-[1.02rem] font-semibold text-blood">
-          <Icon name="skull" className="h-5 w-5" />
+          <Icon name="skull" className="skull-swing h-5 w-5" />
           <span>
             Defeated by <b>{by}</b> at Level {attempted}!
           </span>
@@ -152,16 +159,22 @@ export default function ResultScreen({ g }) {
 
       {stats && (
         <div className="mx-auto mt-3 grid w-full max-w-[300px] grid-cols-3 gap-2">
-          <Stat label="MAX COMBO" value={`×${stats.longestCombo}`} />
+          <Stat
+            label="MAX COMBO"
+            value={`×${stats.longestCombo}`}
+            delay="150ms"
+          />
           <Stat
             label="FASTEST"
             value={
               stats.fastest !== null ? `${stats.fastest.toFixed(1)}s` : '—'
             }
+            delay="240ms"
           />
           <Stat
             label="AVG"
             value={stats.avg !== null ? `${stats.avg.toFixed(1)}s` : '—'}
+            delay="330ms"
           />
         </div>
       )}
@@ -177,8 +190,14 @@ export default function ResultScreen({ g }) {
         {honorItems}
       </div>
 
-      <p className="mx-auto mt-3 flex w-fit items-center gap-2.5 rounded-[18px] border border-edge bg-panel px-4 py-2.5 text-left text-[1.05rem] font-semibold">
-        <Icon name={won ? tier.icon : 'skull'} className="h-5 w-5 text-blood" />
+      <p
+        className="animate-rise-in mx-auto mt-3 flex w-fit items-center gap-2.5 rounded-[18px] border border-edge bg-panel px-4 py-2.5 text-left text-[1.05rem] font-semibold"
+        style={{ animationDelay: '450ms' }}
+      >
+        <Icon
+          name={won ? tier.icon : 'skull'}
+          className={`h-5 w-5 text-blood ${won ? '' : 'skull-swing'}`}
+        />
         <span>
           {won
             ? tier.text

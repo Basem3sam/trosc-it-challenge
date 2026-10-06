@@ -40,7 +40,7 @@
   --animate-shake: shake 0.4s ease;
   --animate-hit: hitflash 0.3s ease;
   --animate-lunge: lunge 0.5s ease;
-  --animate-die: die 0.6s ease forwards;
+  --animate-die: die 0.7s ease-in forwards;
   --animate-heart-break: heartBreak 0.55s ease both;
   --animate-rise: rise 0.9s ease-out forwards;
   --animate-burst: burst 0.6s ease-out forwards;
@@ -217,21 +217,51 @@
 }
 @keyframes die {
   0% {
-    transform: none;
+    transform: rotate(0) translateY(0);
     opacity: 1;
-    filter: brightness(2.5);
+    filter: brightness(1.6);
   }
-  25% {
-    transform: translate(-4px, 2px) rotate(-6deg);
-    filter: brightness(2.2);
+  30% {
+    transform: rotate(-10deg) translateY(3px);
   }
-  50% {
-    transform: translate(4px, 8px) rotate(6deg);
-    filter: brightness(1);
+  60% {
+    transform: rotate(14deg) translateY(8px);
   }
   100% {
-    transform: translateY(30px) rotate(84deg) scale(0.92);
+    transform: translateY(34px) rotate(88deg) scale(0.9);
     opacity: 0;
+    filter: brightness(1);
+  }
+}
+@keyframes dizzy {
+  0% {
+    transform: rotate(0) scale(1, 1);
+  }
+  15% {
+    transform: rotate(-9deg) scale(1.05, 0.95);
+  }
+  35% {
+    transform: rotate(8deg) scale(0.96, 1.05);
+  }
+  55% {
+    transform: rotate(-7deg) scale(1.04, 0.96);
+  }
+  75% {
+    transform: rotate(5deg) scale(0.98, 1.02);
+  }
+  100% {
+    transform: rotate(0) scale(1, 1);
+  }
+}
+@keyframes blinkEyes {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95%,
+  97% {
+    transform: scaleY(0.08);
   }
 }
 @keyframes heartBreak {
@@ -422,6 +452,89 @@
     opacity: 0;
   }
 }
+@keyframes spawnIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-14deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.08) rotate(3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes shockwave {
+  from {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(5);
+    opacity: 0;
+  }
+}
+@keyframes spiritRise {
+  from {
+    transform: translate(-50%, -50%);
+    opacity: 0.9;
+  }
+  to {
+    transform: translate(calc(-50% + var(--dx, 20px)), calc(-50% - 52px))
+      rotate(160deg);
+    opacity: 0;
+  }
+}
+@keyframes critPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+@keyframes swing {
+  0%,
+  100% {
+    transform: rotate(-9deg);
+  }
+  50% {
+    transform: rotate(9deg);
+  }
+}
+@keyframes twinkleK {
+  0%,
+  100% {
+    opacity: 0.12;
+    transform: scale(0.7) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2) rotate(25deg);
+  }
+}
+@keyframes ringGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 rgba(255, 70, 85, 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(255, 70, 85, 0.55));
+  }
+}
+@keyframes cdRing {
+  from {
+    transform: translate(-50%, -50%) scale(0.35);
+    opacity: 0.95;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(2.4);
+    opacity: 0;
+  }
+}
 
 /* ==========================================================================
    Base
@@ -443,7 +556,6 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* slim themed scrollbar for the desktop page */
 @media (pointer: fine) {
   ::-webkit-scrollbar {
     width: 10px;
@@ -519,6 +631,28 @@ body::before {
   pointer-events: none;
 }
 
+/* light-sheen sweep on primary buttons (hover) */
+.btn-sheen::after {
+  content: '';
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: -45%;
+  width: 35%;
+  background: linear-gradient(
+    105deg,
+    transparent,
+    rgba(255, 255, 255, 0.38),
+    transparent
+  );
+  transform: skewX(-18deg);
+  transition: left 0.55s ease;
+  pointer-events: none;
+}
+.btn-sheen:hover::after {
+  left: 115%;
+}
+
 .dock-fade {
   background: linear-gradient(to top, var(--color-night) 68%, transparent);
 }
@@ -537,24 +671,18 @@ body::before {
   animation: gradSlide 3s linear infinite;
 }
 
-/* --------------------------------------------------------------------------
-   Battle scroller — thin retro scrollbar on the INNER question scroller
-   -------------------------------------------------------------------------- */
-/* Battle scroller — native scrollbar fully hidden (zero layout width);
-   a floating custom thumb is drawn in JSX instead, so content stays centered */
+/* battle scroller — native bar hidden (zero layout width), thumb drawn in JSX */
 .battle-scroll {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* old Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .battle-scroll::-webkit-scrollbar {
   display: none;
-} /* Chrome/Safari */
+}
 
-/* -------------------------------------------------------------------------- 
-   Rising fire embers
-   -------------------------------------------------------------------------- */
+/* rising fire embers */
 .particle {
   position: absolute;
   bottom: -14px;
@@ -607,7 +735,82 @@ body::before {
     );
 }
 
-/* Monster battle stage — clipped by the arena card in JSX */
+/* FIGHT! ring burst */
+.cd-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 70, 85, 0.55);
+  animation: cdRing 0.7s ease-out both;
+  pointer-events: none;
+}
+
+/* kill FX: shockwave ring + soul squares */
+.shockwave {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 3px solid var(--color-gold);
+  animation: shockwave 0.6s cubic-bezier(0.2, 0.8, 0.3, 1) 0.12s both;
+  pointer-events: none;
+}
+.spirit {
+  position: absolute;
+  border-radius: 1px;
+  animation: spiritRise 1.1s ease-out both;
+  pointer-events: none;
+}
+
+/* critical hearts — visual sync with the heartbeat sound */
+.hearts-critical {
+  animation: critPulse 1s ease-in-out infinite;
+}
+
+/* result-screen life */
+.skull-swing {
+  animation: swing 2.4s ease-in-out infinite;
+  transform-origin: 50% 0%;
+}
+.rank-shine {
+  position: relative;
+  overflow: hidden;
+}
+.rank-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 70%
+  );
+  background-size: 250% 100%;
+  animation: shimmerSweep 2.2s linear infinite;
+  pointer-events: none;
+}
+.ring-glow {
+  animation: ringGlow 2.6s ease-in-out 1.2s infinite;
+}
+
+/* welcome title sparkles */
+.twinkle {
+  position: absolute;
+  color: var(--color-gold);
+  text-shadow: 0 0 8px rgba(255, 197, 61, 0.8);
+  animation: twinkleK 2.8s ease-in-out infinite;
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
+}
+
+/* monster stage — clipped by the arena card in JSX */
 .monster {
   position: relative;
 }
@@ -645,6 +848,32 @@ body::before {
   pointer-events: none;
 }
 
+/* monster life — idle bob, per-eye blinking, moods, death beats */
+.monster .eye {
+  animation: blinkEyes 5.2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.monster.dying .eye,
+.monster.dead .eye,
+.monster.furious .eye {
+  animation: none;
+}
+
+.monster .deadeyes {
+  opacity: 0;
+  transition: opacity 0.15s ease 0.1s;
+}
+.monster.dying .deadeyes,
+.monster.dead .deadeyes {
+  opacity: 1;
+}
+.monster.dying .pupil,
+.monster.dead .pupil {
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
 .monster svg {
   animation: bob 2.4s ease-in-out infinite;
 }
@@ -661,14 +890,22 @@ body::before {
 .monster.hit svg {
   animation: hitflash 0.3s ease;
 }
+.monster.dying svg {
+  animation: dizzy 0.7s ease-in-out both;
+}
 .monster.attack svg {
   animation: lunge 0.5s ease;
 }
 .monster.dead svg {
-  animation: die 0.6s ease forwards;
+  animation: die 0.7s ease-in forwards;
 }
 .monster.boss svg {
   filter: drop-shadow(0 0 14px rgba(255, 70, 85, 0.55));
+}
+
+/* materialize on spawn */
+.spawn-in {
+  animation: spawnIn 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {

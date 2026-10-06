@@ -477,13 +477,14 @@ export default function useGame() {
         setScore(score + 1);
         setXp(xp + gained);
 
-        // slay the monster
+        // slay the monster — three beats: flash → dizzy (✕ eyes) → topple
         setMonsterPhase('hit');
         sfx.hit();
         later(() => {
-          setMonsterPhase('dead');
+          setMonsterPhase('dying');
           sfx.die();
         }, 200);
+        later(() => setMonsterPhase('dead'), 900);
         const el = spriteRef.current;
         if (el) {
           const r = el.getBoundingClientRect();

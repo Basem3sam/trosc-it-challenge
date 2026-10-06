@@ -19,9 +19,12 @@ const KEY_TONES = [
   'bg-[#4DD0E1]/15 text-[#7FE0EC] border-[#4DD0E1]/40',
 ];
 
+const SPIRIT_COLORS = ['#FFC53D', '#FF8A9B', '#FDEFEF', '#FF4655'];
+
 function Hearts({ hearts, brokeAt, max }) {
+  const critical = hearts === 1;
   return (
-    <div className="flex gap-1.5">
+    <div className={`flex gap-1.5 ${critical ? 'hearts-critical' : ''}`}>
       {Array.from({ length: max }, (_, i) => (
         <span
           key={i}
@@ -160,7 +163,7 @@ function Option({ i, text, correct, chosen, locked, cut, onPick }) {
   const isCorrect = i === correct;
   const isCut = cut.includes(i);
 
-  let cls = 'border-edge hover:border-[#5C3542]';
+  let cls = 'border-edge hover:border-[#5C3542] md:hover:-translate-y-[2px]';
   let keyCls = KEY_TONES[i];
   let state = null;
 
@@ -219,10 +222,36 @@ function Option({ i, text, correct, chosen, locked, cut, onPick }) {
   );
 }
 
-/* --------------------------------------------------------------------------
-   Scroll area: hidden native bar (no layout width → content stays centered),
-   floating custom thumb that fades when idle, soft fade masks top/bottom.
-   -------------------------------------------------------------------------- */
+/* kill FX layer — shockwave ring + soul squares, re-keyed per level */
+function KillFx({ level }) {
+  return (
+    <div
+      key={`fx-${level}`}
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0"
+    >
+      <span className="shockwave" />
+      {Array.from({ length: 7 }, (_, i) => (
+        <span
+          key={i}
+          className="spirit"
+          style={{
+            left: `${38 + Math.random() * 24}%`,
+            top: `${42 + Math.random() * 18}%`,
+            width: 4 + Math.random() * 4,
+            height: 4 + Math.random() * 4,
+            background: SPIRIT_COLORS[i % SPIRIT_COLORS.length],
+            boxShadow: `0 0 6px ${SPIRIT_COLORS[i % SPIRIT_COLORS.length]}`,
+            '--dx': `${Math.random() * 70 - 35}px`,
+            animationDelay: `${150 + i * 90}ms`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* Scroll area — hidden native bar, floating thumb, fade masks */
 function Scroller({ resetKey, follow, children }) {
   const ref = useRef(null);
   const [bar, setBar] = useState({ h: 0, y: 0, show: false });
@@ -248,7 +277,6 @@ function Scroller({ resetKey, follow, children }) {
     );
   };
 
-  /* new level → back to top; answered → glide down to the battle report */
   useEffect(() => {
     ref.current?.scrollTo({ top: 0 });
     measure();
@@ -261,7 +289,6 @@ function Scroller({ resetKey, follow, children }) {
       });
   }, [follow]);
 
-  /* keep thumb/masks honest when content resizes */
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -296,7 +323,6 @@ function Scroller({ resetKey, follow, children }) {
         {children}
       </div>
 
-      {/* floating thumb — absolute, so it never takes layout space */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-y-2 right-[3px] w-[5px]"
@@ -317,7 +343,10 @@ function Scroller({ resetKey, follow, children }) {
 export default function BattleScreen({ g }) {
   const { q } = g;
   const chosen = g.locked ? g.answers[g.answers.length - 1] : null;
-  const enemyDown = g.monsterPhase === 'hit' || g.monsterPhase === 'dead';
+  const enemyDown =
+    g.monsterPhase === 'hit' ||
+    g.monsterPhase === 'dying' ||
+    g.monsterPhase === 'dead';
   const lastLevel = g.index === g.total - 1;
 
   return (
@@ -367,11 +396,16 @@ export default function BattleScreen({ g }) {
         className={`relative mb-2 shrink-0 overflow-hidden rounded-2xl border border-edge bg-panel px-4 pb-3.5 pt-3 ${g.arenaShake ? 'animate-shake' : ''}`}
       >
         <div className="flex items-center gap-3.5">
-          <div
-            ref={g.spriteRef}
-            className={`monster ${g.monster.boss ? 'boss w-20' : 'w-16'} shrink-0 ${g.mood} ${g.monsterPhase !== 'idle' ? g.monsterPhase : ''}`}
-            dangerouslySetInnerHTML={{ __html: monsterSVG(g.monster) }}
-          />
+          {/* sprite wrapper — hosts the monster + kill FX */}
+          <div className="relative shrink-0">
+            <div
+              key={`m-${g.index}`}
+              ref={g.spriteRef}
+              className={`monster spawn-in ${g.monster.boss ? 'boss w-20' : 'w-16'} ${g.mood} ${g.monsterPhase !== 'idle' ? g.monsterPhase : ''}`}
+              dangerouslySetInnerHTML={{ __html: monsterSVG(g.monster) }}
+            />
+            {enemyDown && <KillFx level={g.index} />}
+          </div>
           <div className="min-w-0 flex-1">
             <div className="mb-1.5 flex items-center gap-2">
               <span className="truncate font-display text-[0.92rem]">
@@ -475,7 +509,7 @@ export default function BattleScreen({ g }) {
         </div>
       </div>
 
-      {/* QUESTION — fixed chrome, always visible; the gap below is the rhythm */}
+      {/* QUESTION — fixed chrome */}
       <article
         key={g.index}
         className={`mb-2.5 shrink-0 animate-card-in rounded-2xl border border-edge bg-panel p-[clamp(0.95rem,3.4vw,1.4rem)] ${g.cardShake ? 'animate-shake' : ''}`}
@@ -488,7 +522,7 @@ export default function BattleScreen({ g }) {
         </h2>
       </article>
 
-      {/* OPTIONS + battle report — the ONLY scrolling region */}
+      {/* OPTIONS + battle report — the only scrolling region */}
       <Scroller resetKey={g.index} follow={g.locked}>
         <div className="grid gap-2">
           {q.options.map((opt, i) => (
@@ -542,7 +576,7 @@ export default function BattleScreen({ g }) {
         )}
       </Scroller>
 
-      {/* CTA — always visible */}
+      {/* CTA */}
       <div className="shrink-0 pb-[calc(0.6rem+env(safe-area-inset-bottom))] pt-2">
         <button
           onClick={g.handleNext}

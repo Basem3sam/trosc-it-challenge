@@ -176,6 +176,7 @@ export default function Game() {
           className="fixed inset-0 z-[90] grid place-items-center bg-[rgba(10,4,7,.92)]"
           aria-hidden="true"
         >
+          <span key={`r-${g.countdownStep}`} className="cd-ring" />
           <span
             key={g.countdownStep}
             className="animate-cd font-display text-[clamp(5rem,30vw,9rem)] text-blood [text-shadow:0_0_40px_rgba(255,70,85,.5)]"

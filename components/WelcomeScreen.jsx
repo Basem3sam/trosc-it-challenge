@@ -205,6 +205,8 @@ export default function WelcomeScreen({ best, onStart }) {
           TROSC
           <br />
           <span className="text-gradient">Challenge</span>
+                  <span aria-hidden="true" className="twinkle" style={{ top: "-8px", right: "6%", fontSize: "16px" }}>✦</span>
+        <span aria-hidden="true" className="twinkle" style={{ top: "40%", left: "-6px", fontSize: "11px", animationDelay: "1.4s" }}>✦</span>
           <span
             className="ml-1 inline-block h-[0.72em] w-[0.45ch] translate-y-[0.06em] animate-blink bg-blood"
             aria-hidden="true"

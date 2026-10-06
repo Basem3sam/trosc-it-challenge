@@ -132,7 +132,7 @@ export default function WelcomeScreen({ best, onStart }) {
         </button>
       </form>
 
-      <p className="mt-5 text-center font-mono text-[0.7rem] tracking-[0.1em] text-dust">
+      <p className="mt-5 whitespace-nowrap text-center font-mono text-[0.62rem] tracking-[0.06em] text-dust">
         NO SIGN-UP · ~3 MIN · {HEARTS_MAX} HEARTS · EVERY {POWERUP_EVERY} IN A
         ROW = POWER-UP
       </p>

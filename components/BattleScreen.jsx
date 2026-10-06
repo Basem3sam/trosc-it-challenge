@@ -67,7 +67,7 @@ function TimerRow({ remaining, total, warn, danger, frozen, frozenLeft }) {
   );
 }
 
-/* Real button: 3D press + hint line + breathing border when available */
+/* Real button: 3D press + hint (mobile only) + breathing border when available */
 function PowerButton({ icon, label, hint, count, disabled, onClick }) {
   return (
     <button
@@ -84,11 +84,11 @@ function PowerButton({ icon, label, hint, count, disabled, onClick }) {
     >
       <Icon name={icon} className="h-5 w-5 shrink-0" />
       <span className="flex flex-col leading-tight">
-        <span className="font-mono text-[0.7rem] font-bold tracking-[0.1em]">
+        <span className="whitespace-nowrap font-mono text-[0.7rem] font-bold tracking-[0.1em]">
           {label}
         </span>
         <span
-          className={`text-[0.6rem] ${disabled ? 'text-dust' : 'text-gold/70'}`}
+          className={`hidden text-[0.6rem] md:inline ${disabled ? 'text-dust' : 'text-gold/70'}`}
         >
           {hint}
         </span>
@@ -100,8 +100,7 @@ function PowerButton({ icon, label, hint, count, disabled, onClick }) {
   );
 }
 
-/* Stat tile: content-hugging pill, icon circle, 2-line label.
-   Flat (no 3D shadow, no press) — reads as info, never as a button. */
+/* Stat tile: single-line pill, icon circle + label. Flat — clearly info. */
 function NextPowerChip({ combo, every }) {
   const filled = combo % every;
   const dots = '●'.repeat(filled) + '○'.repeat(every - filled);
@@ -110,23 +109,21 @@ function NextPowerChip({ combo, every }) {
     <span
       title={`Every ${every} correct answers in a row earn a power-up`}
       aria-label={`Streak ${filled} of ${every} toward the next power-up`}
-      className={`inline-flex items-center gap-2 rounded-full py-1 pl-1.5 pr-3 font-mono ${hot ? 'bg-gold/12 text-gold' : 'bg-panel2 text-dust'}`}
+      className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full py-1.5 pl-1.5 pr-3 font-mono ${hot ? 'bg-gold/12 text-gold' : 'bg-panel2 text-dust'}`}
     >
       <span
-        className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${hot ? 'bg-gold/20' : 'bg-edge/50'}`}
+        className={`grid h-6 w-6 shrink-0 place-items-center rounded-full ${hot ? 'bg-gold/20' : 'bg-edge/60'}`}
       >
         <Icon
           name="bolt"
-          className={`h-4 w-4 ${hot ? 'animate-icon-glow text-gold' : 'text-dust'}`}
+          className={`h-3.5 w-3.5 ${hot ? 'animate-icon-glow text-gold' : ''}`}
         />
       </span>
-      <span className="leading-tight">
-        <span className="block text-[0.55rem] font-bold tracking-[0.18em] opacity-70">
-          {hot ? 'POWER-UP IN…' : 'NEXT POWER-UP'}
-        </span>
-        <span aria-hidden="true" className="block text-[0.8rem]">
-          {dots}
-        </span>
+      <span className="text-[0.78rem] tracking-[0.06em]">
+        <span className="text-[0.6rem] font-bold tracking-[0.16em] opacity-70">
+          NEXT
+        </span>{' '}
+        <span aria-hidden="true">{dots}</span>
       </span>
     </span>
   );
@@ -140,21 +137,21 @@ function ShieldChip({ active }) {
           ? 'Shield active — your next mistake is free'
           : 'No shield — earn one with a 3-answer streak'
       }
-      className={`inline-flex items-center gap-2 rounded-full py-1 pl-1.5 pr-3 font-mono ${active ? 'bg-gold/12 text-gold' : 'bg-panel2 text-dust opacity-80'}`}
+      className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full py-1.5 pl-1.5 pr-3 font-mono text-[0.78rem] tracking-[0.06em] ${active ? 'bg-gold/12 text-gold' : 'bg-panel2 text-dust opacity-80'}`}
     >
       <span
-        className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${active ? 'bg-gold/20' : 'bg-edge/50'}`}
+        className={`grid h-6 w-6 shrink-0 place-items-center rounded-full ${active ? 'bg-gold/20' : 'bg-edge/60'}`}
       >
         <Icon
           name="shield"
-          className={`h-4 w-4 ${active ? 'animate-icon-glow text-gold' : 'text-dust'}`}
+          className={`h-3.5 w-3.5 ${active ? 'animate-icon-glow text-gold' : ''}`}
         />
       </span>
-      <span className="leading-tight">
-        <span className="block text-[0.55rem] font-bold tracking-[0.18em] opacity-70">
+      <span>
+        <span className="text-[0.6rem] font-bold tracking-[0.16em] opacity-70">
           SHIELD
-        </span>
-        <span className="block text-[0.8rem]">{active ? 'ACTIVE' : 'OFF'}</span>
+        </span>{' '}
+        {active ? 'ON' : '—'}
       </span>
     </span>
   );
@@ -196,7 +193,8 @@ function Option({ i, text, correct, chosen, locked, cut, onPick }) {
       type="button"
       onClick={onPick}
       disabled={locked || isCut}
-      className={`group flex min-h-[62px] w-full items-center gap-3.5 rounded-xl border-[1.5px] bg-panel2 px-4 py-3 text-left font-medium leading-snug text-cream transition active:scale-[.97] disabled:cursor-default md:min-h-[76px] ${cls} ${locked && isChosen ? 'animate-stamp' : ''}`}
+      style={{ animationDelay: `${i * 60}ms` }}
+      className={`group flex min-h-[62px] w-full items-center gap-3.5 rounded-xl border-[1.5px] bg-panel2 px-4 py-3 text-left font-medium leading-snug text-cream transition active:scale-[.97] disabled:cursor-default md:min-h-[76px] animate-opt-in ${cls} ${locked && isChosen ? 'animate-stamp' : ''}`}
     >
       <span
         className={`grid h-[34px] w-[34px] shrink-0 place-items-center rounded-lg border font-mono text-sm font-bold transition-transform group-hover:scale-110 ${keyCls}`}
@@ -271,9 +269,9 @@ export default function BattleScreen({ g }) {
         </div>
       </header>
 
-      {/* THE ARENA — spotlit stage */}
+      {/* THE ARENA — overflow-hidden clips the stage glow inside the card */}
       <div
-        className={`relative mb-2 rounded-2xl border border-edge bg-panel px-4 pb-4 pt-3.5 ${g.arenaShake ? 'animate-shake' : ''}`}
+        className={`relative mb-2 overflow-hidden rounded-2xl border border-edge bg-panel px-4 pb-4 pt-3.5 ${g.arenaShake ? 'animate-shake' : ''}`}
       >
         <div className="flex items-center gap-3.5">
           <div
@@ -297,7 +295,7 @@ export default function BattleScreen({ g }) {
             </div>
             <div className="h-[9px] overflow-hidden rounded-full bg-panel2">
               <div
-                className="h-full rounded-full bg-blood shadow-[0_0_10px_rgba(255,70,85,.55)] transition-[width] duration-300"
+                className={`h-full rounded-full bg-blood shadow-[0_0_10px_rgba(255,70,85,.55)] transition-[width] duration-300 ${enemyDown ? '' : 'shimmer'}`}
                 style={{ width: enemyDown ? '0%' : '100%' }}
               />
             </div>
@@ -311,7 +309,7 @@ export default function BattleScreen({ g }) {
           <Hearts hearts={g.hearts} brokeAt={g.brokeAt} max={HEARTS_MAX} />
           {g.shieldActive && (
             <span
-              className="ml-auto inline-flex items-center gap-1 font-mono text-[0.6rem] font-bold tracking-[0.1em] text-gold"
+              className="ml-auto inline-flex items-center gap-1.5 font-mono text-[0.62rem] font-bold tracking-[0.1em] text-gold"
               title="Shield active — next mistake is free"
             >
               <span className="grid h-5 w-5 place-items-center rounded-full bg-gold/15">
@@ -360,8 +358,8 @@ export default function BattleScreen({ g }) {
         </p>
       )}
 
-      {/* buttons (3D, pressable) vs stat tiles (flat, informative) */}
-      <div className="mb-2 flex flex-wrap items-center gap-2">
+      {/* buttons (3D, pressable) — stat chips stay on ONE line on desktop */}
+      <div className="mb-2 flex flex-wrap items-center gap-2 md:flex-nowrap">
         <PowerButton
           icon="cut"
           label="50/50"
@@ -378,9 +376,10 @@ export default function BattleScreen({ g }) {
           disabled={!g.canFreeze}
           onClick={g.useFreeze}
         />
-        <span className="ml-auto" />
-        <NextPowerChip combo={g.combo} every={POWERUP_EVERY} />
-        <ShieldChip active={g.shieldActive} />
+        <div className="ml-auto flex flex-nowrap items-center gap-2">
+          <NextPowerChip combo={g.combo} every={POWERUP_EVERY} />
+          <ShieldChip active={g.shieldActive} />
+        </div>
       </div>
 
       {/* question */}

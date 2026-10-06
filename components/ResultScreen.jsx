@@ -89,7 +89,6 @@ export default function ResultScreen({ g }) {
       aria-labelledby="result-kicker"
       className="m-auto w-full animate-screen-in text-center"
     >
-      {/* big dramatic kicker */}
       <h1
         id="result-kicker"
         className={`mb-2 font-display text-[clamp(1.5rem,6.5vw,2.2rem)] tracking-[0.06em] ${
@@ -121,7 +120,6 @@ export default function ResultScreen({ g }) {
         {g.xp} XP EARNED
       </p>
 
-      {/* run stats */}
       {stats && (
         <div className="mx-auto mb-5 grid w-full max-w-[300px] grid-cols-3 gap-2">
           <Stat label="MAX COMBO" value={`×${stats.longestCombo}`} />
@@ -144,7 +142,6 @@ export default function ResultScreen({ g }) {
         </p>
       )}
 
-      {/* badges */}
       {badges && badges.length > 0 && (
         <div className="mb-4 flex flex-wrap justify-center gap-2">
           {badges.map((b) => (
@@ -158,7 +155,6 @@ export default function ResultScreen({ g }) {
         </div>
       )}
 
-      {/* rank */}
       <p
         className={`mx-auto mb-5 flex w-fit items-center gap-2.5 rounded-full border px-5 py-2.5 font-mono text-[0.88rem] tracking-[0.14em] ${won ? 'animate-rank-in border-gold/45 bg-gold/10 text-gold' : 'border-blood/45 bg-blood/10 text-blood'}`}
       >
@@ -190,7 +186,7 @@ export default function ResultScreen({ g }) {
         </span>
       </p>
 
-      {/* per-level recap — graded against this run's shuffled questions */}
+      {/* per-level recap — dots pop in one by one */}
       <div className="mb-6">
         <p className="mb-2.5 font-mono text-[0.72rem] tracking-[0.22em] text-dust">
           YOUR RUN
@@ -202,7 +198,8 @@ export default function ResultScreen({ g }) {
               <span
                 key={i}
                 title={`Level ${i + 1}: ${ok ? 'monster defeated' : 'you were hit'}`}
-                className={`h-4 w-4 rounded-full ${ok ? 'bg-blood' : 'bg-frost'}`}
+                style={{ animationDelay: `${i * 55}ms` }}
+                className={`animate-dot-pop h-4 w-4 rounded-full ${ok ? 'bg-blood' : 'bg-frost'}`}
               />
             );
           })}

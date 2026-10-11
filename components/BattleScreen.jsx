@@ -169,16 +169,16 @@ function Option({ i, text, correct, chosen, locked, cut, onPick }) {
 
   if (locked) {
     if (isCorrect && isChosen) {
-      cls = 'border-blood bg-blood/10';
-      keyCls = 'border-blood bg-blood text-bloodink';
+      cls = 'border-leaf bg-leaf/10 shadow-[0_0_18px_rgba(52,211,153,.18)]';
+      keyCls = 'border-leaf bg-leaf text-leafink';
       state = 'yes';
     } else if (isCorrect) {
-      cls = 'border-blood';
-      keyCls = 'border-blood bg-blood text-bloodink';
+      cls = 'border-leaf bg-leaf/5 shadow-[0_0_18px_rgba(52,211,153,.15)]';
+      keyCls = 'border-leaf bg-leaf text-leafink';
       state = 'reveal';
     } else if (isChosen) {
-      cls = 'border-frost bg-frost/10';
-      keyCls = 'border-frost bg-frost text-frostink';
+      cls = 'border-blood bg-blood/10 shadow-[0_0_18px_rgba(255,70,85,.18)]';
+      keyCls = 'border-blood bg-blood text-bloodink';
       state = 'no';
     } else {
       cls = 'border-edge opacity-50';
@@ -204,17 +204,17 @@ function Option({ i, text, correct, chosen, locked, cut, onPick }) {
       </span>
       <span className="flex-1">{text}</span>
       {state === 'yes' && (
-        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blood text-bloodink">
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-leaf text-leafink">
           <Icon name="check" className="h-4 w-4" />
         </span>
       )}
       {state === 'no' && (
-        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-frost text-frostink">
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blood text-bloodink">
           <Icon name="cross" className="h-4 w-4" />
         </span>
       )}
       {state === 'reveal' && (
-        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border-[1.5px] border-dashed border-blood text-blood">
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border-[1.5px] border-dashed border-leaf text-leaf">
           <Icon name="check" className="h-4 w-4" />
         </span>
       )}
@@ -541,31 +541,42 @@ export default function BattleScreen({ g }) {
           <div
             role="status"
             aria-live="polite"
-            className={`animate-card-in mb-1 mt-2.5 rounded-xl border p-3.5 ${g.feedback.ok ? 'border-blood/45 bg-blood/10' : 'border-frost/45 bg-frost/10'}`}
+            className={`animate-card-in mb-1 mt-2.5 rounded-xl border p-3.5 ${g.feedback.ok ? 'border-leaf/50 bg-leaf/10' : 'border-blood/50 bg-blood/10'}`}
           >
             <div className="flex items-start gap-3">
               <span
-                className={`mt-0.5 grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full ${g.feedback.ok ? 'bg-blood text-bloodink' : 'bg-frost text-frostink'}`}
+                className={`mt-0.5 grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full ${g.feedback.ok ? 'bg-leaf text-leafink' : 'bg-blood text-bloodink'}`}
               >
                 <Icon
                   name={g.feedback.ok ? 'check' : 'cross'}
                   className="h-4 w-4"
                 />
               </span>
-              <div>
+              <div className="min-w-0">
                 <strong className="block text-[1.08rem]">
                   {g.feedback.heading}
                 </strong>
+                {!g.feedback.ok && (
+                  <span className="mt-1 block text-[0.98rem] font-semibold text-leaf">
+                    Correct answer: {'ABCD'[q.correctAnswer]}.{' '}
+                    {q.options[q.correctAnswer]}
+                  </span>
+                )}
+                {!g.feedback.ok && chosen !== -1 && chosen != null && (
+                  <span className="mt-0.5 block text-[0.95rem] font-semibold text-blood">
+                    Your pick: {'ABCD'[chosen]}. {q.options[chosen]}
+                  </span>
+                )}
                 {g.feedback.flavor && (
                   <span
-                    className={`mt-0.5 block text-[0.96rem] font-semibold ${g.feedback.ok ? 'text-gold' : 'text-frost'}`}
+                    className={`mt-0.5 block text-[0.96rem] font-semibold ${g.feedback.ok ? 'text-gold' : 'text-blood'}`}
                   >
                     {g.feedback.flavor}
                   </span>
                 )}
                 {g.feedback.explain && (
                   <span className="mt-0.5 block text-[0.98rem] text-dust">
-                    {g.feedback.explain}
+                    Why: {g.feedback.explain}
                   </span>
                 )}
               </div>

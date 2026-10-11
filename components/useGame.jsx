@@ -510,7 +510,7 @@ export default function useGame() {
         }
         setFeedback({
           ok: true,
-          heading: `Correct! +${gained} XP`,
+          heading: `Correct Answer! +${gained} XP`,
           flavor,
           explain: q.explanation,
         });
@@ -543,7 +543,7 @@ export default function useGame() {
           buzz(20);
           setFeedback({
             ok: false,
-            heading: 'Not quite!',
+            heading: 'Incorrect Answer',
             flavor: 'Your SHIELD absorbed the hit — no heart lost!',
             explain: q.explanation,
           });
@@ -564,7 +564,7 @@ export default function useGame() {
           flashVignette();
           setFeedback({
             ok: false,
-            heading: 'Not quite!',
+            heading: 'Incorrect Answer',
             flavor: `"${pick(TAUNTS)}" — ${monster.name}`,
             explain: q.explanation,
           });

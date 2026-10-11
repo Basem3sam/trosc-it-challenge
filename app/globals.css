@@ -17,6 +17,8 @@
   --color-warn: #ffa63d;
   --color-frost: #4d9fff;
   --color-frostink: #071b30;
+  --color-leaf: #34d399;
+  --color-leafink: #06281c;
 
   --font-display: var(--font-bungee), 'Space Grotesk', sans-serif;
   --font-body: var(--font-grotesk), 'Segoe UI', sans-serif;

@@ -115,7 +115,7 @@ export default function ResultScreen({ g }) {
     : [
         <span
           key="rank-lost"
-          className="animate-rank-in inline-flex items-center gap-2.5 rounded-full border border-blood/45 bg-blood/10 px-4 py-1.5 font-mono text-[0.84rem] tracking-[0.14em] text-blood"
+          className="animate-rank-in inline-flex items-center gap-2.5 rounded-full border border-blood/45 bg-blood/10 px-4 py-1.5 font-mono text-[0.84rem] tracking-[0.14em] text-bloodsoft"
         >
           <Icon name="skull" className="h-5 w-5" />
           <b className="font-display text-2xl">F</b>
@@ -143,7 +143,7 @@ export default function ResultScreen({ g }) {
       </h2>
 
       {!won && (
-        <p className="mb-3 flex items-center justify-center gap-2 text-[1.02rem] font-semibold text-blood">
+        <p className="mb-3 flex items-center justify-center gap-2 text-[1.02rem] font-semibold text-bloodsoft">
           <Icon name="skull" className="skull-swing h-5 w-5" />
           <span>
             Defeated by <b>{by}</b> at Level {attempted}!
@@ -214,12 +214,23 @@ export default function ResultScreen({ g }) {
                 key={i}
                 title={`Level ${i + 1}: ${ok ? 'monster defeated' : 'you were hit'}`}
                 style={{ animationDelay: `${i * 55}ms` }}
-                className={`animate-dot-pop h-3.5 w-3.5 rounded-full ${ok ? 'bg-blood' : 'bg-frost'}`}
+                className={`animate-dot-pop h-3.5 w-3.5 rounded-full ${ok ? 'bg-leaf' : 'bg-blood'}`}
               />
             );
           })}
         </div>
-        <p className="mt-2 flex items-center justify-center gap-1.5 font-mono text-[0.72rem] tracking-[0.1em] text-dust">
+        {/* legend — result must be readable without relying on color alone */}
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-4 font-mono text-[0.62rem] tracking-[0.1em] text-dust">
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-leaf" />
+            CORRECT
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-blood" />
+            WRONG
+          </span>
+        </div>
+        <p className="mt-3 flex items-center justify-center gap-1.5 font-mono text-[0.72rem] tracking-[0.1em] text-dust">
           <Icon name="bolt" className="h-4 w-4 text-gold" /> Screenshot your
           rank and challenge your friends!
         </p>

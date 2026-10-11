@@ -451,7 +451,7 @@ export default function BattleScreen({ g }) {
           <div className="absolute left-1/2 top-[40%] z-10 -translate-x-1/2 -translate-y-1/2">
             <span
               key={g.statusStamp.id}
-              className={`animate-stamp block whitespace-nowrap rounded-[10px] px-3.5 py-1 font-display text-base ${g.statusStamp.kind === 'good' ? 'bg-blood text-bloodink' : 'bg-frost text-frostink'}`}
+              className={`animate-stamp block whitespace-nowrap rounded-[10px] px-3.5 py-1 font-display text-base ${g.statusStamp.kind === 'good' ? 'bg-leaf text-leafink' : 'bg-blood text-bloodink'}`}
             >
               {g.statusStamp.text}
             </span>
@@ -563,13 +563,13 @@ export default function BattleScreen({ g }) {
                   </span>
                 )}
                 {!g.feedback.ok && chosen !== -1 && chosen != null && (
-                  <span className="mt-0.5 block text-[0.95rem] font-semibold text-blood">
+                  <span className="mt-0.5 block text-[0.95rem] font-semibold text-bloodsoft">
                     Your pick: {'ABCD'[chosen]}. {q.options[chosen]}
                   </span>
                 )}
                 {g.feedback.flavor && (
                   <span
-                    className={`mt-0.5 block text-[0.96rem] font-semibold ${g.feedback.ok ? 'text-gold' : 'text-blood'}`}
+                    className={`mt-0.5 block text-[0.96rem] font-semibold ${g.feedback.ok ? 'text-gold' : 'text-bloodsoft'}`}
                   >
                     {g.feedback.flavor}
                   </span>
@@ -589,7 +589,7 @@ export default function BattleScreen({ g }) {
       <div className="shrink-0 pb-[calc(0.6rem+env(safe-area-inset-bottom))] pt-2">
         <button
           onClick={g.handleNext}
-          disabled={!g.locked}
+          disabled={!g.locked || g.gameOverPending}
           className={`${BTN_PRIMARY} ${g.locked ? 'animate-glow' : ''}`}
         >
           {lastLevel ? (

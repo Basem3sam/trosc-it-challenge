@@ -111,6 +111,7 @@ export default function useGame() {
   const toastTimerRef = useRef(null);
   const handleTimeoutRef = useRef(() => {});
   const gameOverRef = useRef(() => {});
+  const gameOverPendingRef = useRef(false); // death in flight — blocks a late win
 
   /* ---------- tiny helpers ---------- */
   const later = useCallback((fn, ms) => {
@@ -237,6 +238,7 @@ export default function useGame() {
 
   /* ---------- run lifecycle ---------- */
   const winGame = useCallback(() => {
+    if (gameOverPendingRef.current) return; // loss already scheduled — never overwrite it
     clearProgress();
     const tier = tierFor(score);
     const okTimes = answerTimes.filter((a) => a.ok).map((a) => a.t);
@@ -359,6 +361,7 @@ export default function useGame() {
       introRef.current = false;
       frozenRef.current = false;
       frozenLeftRef.current = 0;
+      gameOverPendingRef.current = false;
       const freshRun = shuffleRun();
 
       setName(nm);
@@ -395,6 +398,7 @@ export default function useGame() {
       saveProgress({
         name: nm,
         answers: [],
+        answerTimes: [],
         xp: 0,
         combo: 0,
         hearts: HEARTS_MAX,
@@ -416,6 +420,7 @@ export default function useGame() {
     introRef.current = false;
     frozenRef.current = false;
     frozenLeftRef.current = 0;
+    gameOverPendingRef.current = false;
     setIndex(0);
     setScore(0);
     setXp(0);
@@ -521,6 +526,7 @@ export default function useGame() {
         saveProgress({
           name,
           answers: nextAnswers,
+          answerTimes: nextTimes,
           xp: xp + gained,
           combo: nextCombo,
           hearts,
@@ -550,6 +556,7 @@ export default function useGame() {
           saveProgress({
             name,
             answers: nextAnswers,
+            answerTimes: nextTimes,
             xp,
             combo: 0,
             hearts,
@@ -577,6 +584,7 @@ export default function useGame() {
           saveProgress({
             name,
             answers: nextAnswers,
+            answerTimes: nextTimes,
             xp,
             combo: 0,
             hearts: nextHearts,
@@ -586,6 +594,7 @@ export default function useGame() {
           });
 
           if (nextHearts <= 0) {
+            gameOverPendingRef.current = true;
             later(() => gameOverRef.current(monster.name), 1000);
             return;
           }
@@ -648,6 +657,7 @@ export default function useGame() {
       saveProgress({
         name,
         answers: nextAnswers,
+        answerTimes,
         xp,
         combo: 0,
         hearts,
@@ -674,6 +684,7 @@ export default function useGame() {
       saveProgress({
         name,
         answers: nextAnswers,
+        answerTimes,
         xp,
         combo: 0,
         hearts: nextHearts,
@@ -682,12 +693,16 @@ export default function useGame() {
         shield: false,
       });
 
-      if (nextHearts <= 0) later(() => gameOverRef.current(monster.name), 1000);
+      if (nextHearts <= 0) {
+        gameOverPendingRef.current = true;
+        later(() => gameOverRef.current(monster.name), 1000);
+      }
     }
   }, [
     run,
     index,
     answers,
+    answerTimes,
     xp,
     hearts,
     name,
@@ -699,7 +714,7 @@ export default function useGame() {
   ]);
 
   const handleNext = useCallback(() => {
-    if (!lockedRef.current) return;
+    if (!lockedRef.current || gameOverPendingRef.current) return;
     if (index === TOTAL - 1) {
       winGame();
       return;
@@ -876,6 +891,17 @@ export default function useGame() {
       : Math.max(1, HEARTS_MAX - misses);
 
     setAnswers(ans);
+    setAnswerTimes(
+      (Array.isArray(data.answerTimes) ? data.answerTimes : [])
+        .filter(
+          (a) =>
+            a &&
+            typeof a === 'object' &&
+            Number.isFinite(a.t) &&
+            typeof a.ok === 'boolean',
+        )
+        .slice(0, TOTAL),
+    );
     setScore(restoredScore);
     setXp(Number.isInteger(data.xp) ? data.xp : 0);
     setCombo(Number.isInteger(data.combo) ? data.combo : 0);
@@ -980,6 +1006,7 @@ export default function useGame() {
     answers,
     run,
     locked,
+    gameOverPending: gameOverPendingRef.current,
     feedback,
     result,
     best,

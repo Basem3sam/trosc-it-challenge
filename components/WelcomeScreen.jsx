@@ -282,7 +282,7 @@ export default function WelcomeScreen({ best, onStart }) {
         style={rise(4)}
       >
         <span className="whitespace-nowrap">
-          NO SIGN-UP · ~3 MIN · {HEARTS_MAX} HEARTS
+          NO SIGN-UP · ~5 MIN · {HEARTS_MAX} HEARTS
         </span>
         <span className="whitespace-nowrap">
           EVERY {POWERUP_EVERY} IN A ROW = POWER-UP

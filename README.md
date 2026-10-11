@@ -57,7 +57,7 @@ The entire experience runs directly in the browser with **no backend and no exte
 - **Tailwind CSS v4**
 - **WebAudio API**
 - **Browser Local Storage**
-- **Zero additional dependencies**
+- **canvas-confetti** — celebration effects (the only extra dependency)
 - **No backend**
 
 ---

@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-Freshmen scan a QR code, enter their name, and battle through <strong>10 IT-themed monsters</strong> by answering beginner-friendly technology questions.
+Freshmen scan a QR code, enter their name, and battle through <strong>20 IT-themed monsters</strong> by answering beginner-friendly technology questions.
 </p>
 
 <p align="center">
@@ -39,7 +39,7 @@ The entire experience runs directly in the browser with **no backend and no exte
 - 🔥 **Combo System** — reach **ON FIRE**, **UNSTOPPABLE**, and **GODLIKE** streaks.
 - 🔊 **Synthesized Sound Effects** — generated using WebAudio, with no audio files required.
 - 📳 **Android Vibration** — tactile feedback during important game events.
-- 👑 **Final Boss** — face **KERNEL PANIC** on Level 10.
+- 👑 **Final Boss** — face **KERNEL PANIC** on Level 20.
 - 🏆 **Ranks** — finish with an **S / A / B / C** rank depending on your performance.
 - 📊 **Run Recap** — review your performance after finishing a run.
 - 🥇 **Personal Best** — your best score is saved locally on your device.

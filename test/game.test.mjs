@@ -2,6 +2,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { questions } from '../lib/questions.js';
+import { ENEMIES } from '../lib/monsters.js';
 import {
   TOTAL,
   QUESTION_TIME,
@@ -24,6 +25,23 @@ describe('question bank', () => {
       assert.ok(Number.isInteger(q.correctAnswer));
       assert.ok(q.correctAnswer >= 0 && q.correctAnswer < q.options.length);
     }
+  });
+});
+
+describe('question bank content', () => {
+  it('has 20 unique questions with unique options each', () => {
+    assert.equal(questions.length, 20);
+    const texts = questions.map((q) => q.question);
+    assert.equal(new Set(texts).size, texts.length);
+    for (const q of questions) {
+      assert.equal(new Set(q.options).size, q.options.length);
+    }
+  });
+
+  it('has a distinct monster for every level before the boss', () => {
+    assert.ok(ENEMIES.length >= TOTAL - 1);
+    const names = ENEMIES.map((e) => e.name);
+    assert.equal(new Set(names).size, names.length);
   });
 });
 
